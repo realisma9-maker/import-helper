@@ -122,7 +122,7 @@ export const CollegeCard = ({
             </p>
           </div>
 
-          {/* Mobile Only: Simplified SAT/Requirements Row */}
+          {/* Mobile Only: Simplified SAT Row */}
           <div className="space-y-1 md:hidden pt-1">
              <div className="flex items-center justify-between text-sm text-muted-foreground">
                 <span>SAT: <span className="font-medium text-foreground">{college.satMath25 > 0 ? `${college.satMath25+college.satRW25}+` : 'Opt'}</span></span>
