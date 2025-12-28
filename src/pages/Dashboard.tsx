@@ -29,7 +29,9 @@ const Dashboard = () => {
     REQUIREMENTS_DATA,
     INTERVIEW_DATA,
     WEBSITE_DATA,
-    SCOIR_FREE_APP
+    SCOIR_FREE_APP,
+    SCHOLARSHIP_DATA,
+    COST_BREAKDOWN_DATA
   } = useCollegeData();
 
   // Filter colleges for Siam's list
@@ -54,6 +56,8 @@ const Dashboard = () => {
     const websiteUrl = WEBSITE_DATA[selectedCollege.name];
     const hasScoir = SCOIR_FREE_APP.has(selectedCollege.name);
     const hasNoEssay = NO_ESSAY_COLLEGES.has(selectedCollege.name);
+    const scholarships = SCHOLARSHIP_DATA[selectedCollege.name];
+    const costBreakdown = COST_BREAKDOWN_DATA[selectedCollege.name];
     
     return (
       <>
@@ -70,6 +74,8 @@ const Dashboard = () => {
           websiteUrl={websiteUrl}
           hasScoir={hasScoir}
           hasNoEssay={hasNoEssay}
+          scholarships={scholarships}
+          costBreakdown={costBreakdown}
         />
       </>
     );
