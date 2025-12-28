@@ -1,277 +1,167 @@
-import { ArrowLeft, MapPin, GraduationCap, Users, DollarSign, Thermometer, TrendingUp, Award, BookOpen, Globe, ExternalLink, Video, PenOff, FileText, Wallet, Gift } from 'lucide-react';
 import { College } from '@/types/college';
-import { Button } from '@/components/ui/button';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Clock, MapPin, FileText, Send, DollarSign, GraduationCap, Percent } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface CollegeDetailProps {
+interface CollegeCardProps {
   college: College;
-  onBack: () => void;
-  englishData?: { TOEFL: string; IELTS: string; DET: string; Other: string };
-  requirementsData?: { teacherRecs: number; counselorRec: boolean; schoolReport: boolean };
-  interviewData?: { admOfficer: boolean; alumni: boolean };
-  websiteUrl?: string;
+  onClick: () => void;
+  noEssay?: boolean;
+  englishReq?: string;
   hasScoir?: boolean;
-  hasNoEssay?: boolean;
-  scholarships?: Array<{ name: string; amount: number | null; deadline: string }>;
-  costBreakdown?: { coa: { inState: number; outOfState: number }; tuition: { inState: number; outOfState: number }; roomBoard: number };
+  isSiamsPick?: boolean;
 }
 
-const StatItem = ({ label, value, highlight, className }: { label: string; value: string; highlight?: boolean; className?: string }) => (
-  <div className={cn("space-y-1", className)}>
-    <p className="text-xs text-muted-foreground">{label}</p>
-    <p className={cn("font-semibold", highlight && "text-accent-green")}>{value}</p>
-  </div>
-);
-
-const Section = ({ title, icon: Icon, children, className }: { title: string; icon: React.ElementType; children: React.ReactNode; className?: string }) => (
-  <div className={cn("bg-card rounded-2xl p-6 shadow-card", className)}>
-    <h2 className="flex items-center gap-2 font-heading text-lg font-bold mb-4">
-      <Icon className="w-5 h-5 text-primary" />
-      {title}
-    </h2>
-    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-      {children}
-    </div>
-  </div>
-);
-
-export const CollegeDetail = ({ 
+export const CollegeCard = ({ 
   college, 
-  onBack, 
-  englishData, 
-  requirementsData,
-  interviewData,
-  websiteUrl,
+  onClick, 
+  noEssay, 
+  englishReq, 
   hasScoir,
-  hasNoEssay,
-  scholarships,
-  costBreakdown
-}: CollegeDetailProps) => {
-  const c = college;
-  const formatCurrency = (n: number) => `$${n.toLocaleString()}`;
+  isSiamsPick 
+}: CollegeCardProps) => {
+  const getAcceptanceColor = (rate: number) => {
+    if (rate < 20) return "text-red-500";
+    if (rate < 50) return "text-orange-500";
+    return "text-green-500";
+  };
+
+  const acceptanceColor = getAcceptanceColor(college.acceptanceRate);
+  
+  const formatCurrency = (val: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      maximumSignificantDigits: 3,
+    }).format(val);
+  };
 
   return (
-    <div className="min-h-screen bg-app-gradient">
-      <div className="max-w-6xl mx-auto px-6 py-8">
-        {/* Back Button */}
-        <Button
-          variant="ghost"
-          onClick={onBack}
-          className="mb-6 text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Dashboard
-        </Button>
+    <Card 
+      onClick={onClick}
+      className="group relative overflow-hidden cursor-pointer hover:shadow-glow transition-all duration-300 border-border/50 bg-card/50 backdrop-blur-sm active:scale-[0.98]"
+    >
+      {/* Siam's Pick Badge */}
+      {isSiamsPick && (
+        <div className="absolute top-0 left-0 bg-gradient-to-r from-accent-orange to-primary text-white text-[10px] uppercase font-bold px-3 py-1 rounded-br-xl z-10 shadow-sm">
+          Siam's Pick
+        </div>
+      )}
 
+      <div className="p-5 flex flex-col h-full">
         {/* Header */}
-        <div className="bg-card rounded-2xl p-8 shadow-card mb-6">
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-            <div className="flex-1">
-              <h1 className="font-heading text-3xl font-extrabold text-foreground">{c.name}</h1>
-              <p className="flex items-center gap-2 text-muted-foreground mt-2">
-                <MapPin className="w-4 h-4" />
-                {c.location}
-              </p>
-              
-              {/* Quick badges */}
-              <div className="flex flex-wrap gap-2 mt-4">
-                {hasNoEssay && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-accent-green-light text-accent-green text-sm font-medium rounded-full">
-                    <PenOff className="w-4 h-4" /> No Supplement Essays
-                  </span>
-                )}
-                {hasScoir && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 text-sm font-medium rounded-full">
-                    <ExternalLink className="w-4 h-4" /> Free App via Scoir
-                  </span>
-                )}
-              </div>
-              
-              {/* Website Link */}
-              {websiteUrl && (
-                <a 
-                  href={websiteUrl} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  Visit Official Website
-                </a>
-              )}
-            </div>
-            <div className={cn(
-              "flex flex-col items-center justify-center px-6 py-4 rounded-xl min-w-[100px] text-center",
-              c.deadlineStatus === 'red' && 'badge-red',
-              c.deadlineStatus === 'orange' && 'badge-orange',
-              c.deadlineStatus === 'gray' && 'badge-gray'
-            )}>
-              <span className="text-2xl font-bold">
-                {c.daysLeft > 900 ? 'N/A' : (c.daysLeft < 0 ? 'Passed' : c.daysLeft)}
-              </span>
-              <span className="text-xs uppercase tracking-wide opacity-80">
-                {c.daysLeft < 0 ? 'Deadline' : (c.daysLeft > 900 ? 'Rolling' : 'Days Left')}
-              </span>
+        <div className="flex justify-between items-start gap-3 mb-4">
+          <div className="flex-1 min-w-0 pt-2">
+            <h3 className="font-heading font-bold text-lg leading-tight text-foreground truncate pr-2">
+              {college.name}
+            </h3>
+            <div className="flex items-center text-muted-foreground mt-1">
+              <MapPin className="w-3.5 h-3.5 mr-1 flex-shrink-0" />
+              <span className="text-xs truncate">{college.location}</span>
             </div>
           </div>
+
+          <Badge 
+            variant="outline" 
+            className={cn(
+              "flex-shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-full border shadow-sm mt-1",
+              college.deadlineStatus === 'red' ? "bg-red-500/10 text-red-500 border-red-500/20" :
+              college.deadlineStatus === 'orange' ? "bg-orange-500/10 text-orange-500 border-orange-500/20" :
+              "bg-secondary text-muted-foreground border-border"
+            )}
+          >
+            <Clock className="w-3 h-3" />
+            <span className="text-xs font-bold whitespace-nowrap">
+              {college.daysLeft < 0 ? "Passed" : 
+               college.daysLeft > 365 ? "Rolling" : 
+               `${college.daysLeft} Days`}
+            </span>
+          </Badge>
         </div>
 
-        <div className="space-y-6">
-          {/* Admissions */}
-          <Section title="Admissions" icon={GraduationCap}>
-            <StatItem label="Overall Acceptance" value={c.raw['Overall Acceptance Rate'] || 'N/A'} />
-            <StatItem label="Early Decision" value={c.edAcceptanceRate} />
-            <StatItem label="Regular Decision" value={c.regularAcceptanceRate} />
-            <StatItem label="International" value={c.rawIntlStr} highlight={c.intlAcceptanceRate > 20} />
-            <StatItem label="Demonstrated Interest" value={c.demonstratedInterest} />
-            <StatItem label="SAT Math (25-75th)" value={c.satMath25 > 0 ? `${c.satMath25}-${c.satMath75}` : 'N/A'} />
-            <StatItem label="SAT R/W (25-75th)" value={c.satRW25 > 0 ? `${c.satRW25}-${c.satRW75}` : 'N/A'} />
-            <StatItem label="ACT (25-75th)" value={c.act25 > 0 ? `${c.act25}-${c.act75}` : 'N/A'} />
-          </Section>
-
-          {/* Test Score Submission */}
-          <Section title="Test Score Submission" icon={FileText}>
-            <StatItem label="% Submitting SAT" value={c.percentSubmittingSAT} />
-            <StatItem label="% Submitting ACT" value={c.percentSubmittingACT} />
-            <StatItem label="Test Policy" value={c.percentSubmittingSAT.includes('Blind') ? 'Test Blind' : (parseFloat(c.percentSubmittingSAT) < 50 ? 'Test Optional' : 'Test Required/Recommended')} />
-          </Section>
-
-          {/* Interview Info */}
-          {interviewData && (
-            <Section title="Interview Options" icon={Video}>
-              <StatItem 
-                label="Admissions Officer Interview" 
-                value={interviewData.admOfficer ? 'Available' : 'Not Offered'} 
-                highlight={interviewData.admOfficer}
-              />
-              <StatItem 
-                label="Alumni Interview" 
-                value={interviewData.alumni ? 'Available' : 'Not Offered'} 
-                highlight={interviewData.alumni}
-              />
-              <StatItem 
-                label="Interview Required" 
-                value={interviewData.admOfficer || interviewData.alumni ? 'Optional/Recommended' : 'Not Required'} 
-              />
-            </Section>
-          )}
-
-          {/* Application Deadlines */}
-          <Section title="Application Deadlines" icon={BookOpen}>
-            <StatItem label="Early Action I" value={c.ea1} />
-            <StatItem label="Early Action II" value={c.ea2} />
-            <StatItem label="Early Decision I" value={c.ed1} />
-            <StatItem label="Early Decision II" value={c.ed2} />
-            <StatItem label="Regular Decision" value={c.rd} />
-          </Section>
-
-          {/* Full Cost Breakdown */}
-          <Section title="Full Cost Breakdown" icon={Wallet}>
-            {costBreakdown ? (
-              <>
-                <StatItem label="Total COA (In-State)" value={formatCurrency(costBreakdown.coa.inState)} />
-                <StatItem label="Total COA (Out-of-State)" value={formatCurrency(costBreakdown.coa.outOfState)} highlight={costBreakdown.coa.inState !== costBreakdown.coa.outOfState} />
-                <StatItem label="Tuition (In-State)" value={formatCurrency(costBreakdown.tuition.inState)} />
-                <StatItem label="Tuition (Out-of-State)" value={formatCurrency(costBreakdown.tuition.outOfState)} />
-                <StatItem label="Room & Board" value={formatCurrency(costBreakdown.roomBoard)} />
-                <StatItem label="Books & Supplies" value="~$1,200" />
-              </>
-            ) : (
-              <>
-                <StatItem label="Total Cost of Attendance" value={c.costDisplay} />
-                <StatItem label="Room & Board" value={c.raw['Room and Board'] || 'N/A'} />
-              </>
-            )}
-          </Section>
-
-          {/* Scholarships */}
-          {scholarships && scholarships.length > 0 && (
-            <div className="bg-gradient-to-br from-accent-orange/10 to-primary/10 rounded-2xl p-6 shadow-card border border-accent-orange/20">
-              <h2 className="flex items-center gap-2 font-heading text-lg font-bold mb-4">
-                <Gift className="w-5 h-5 text-accent-orange" />
-                Available Scholarships
-              </h2>
-              <div className="space-y-3">
-                {scholarships.map((s, i) => (
-                  <div key={i} className="flex items-center justify-between p-3 bg-card/60 rounded-xl">
-                    <div>
-                      <p className="font-semibold text-foreground">{s.name}</p>
-                      <p className="text-sm text-muted-foreground">Deadline: {s.deadline}</p>
-                    </div>
-                    <span className="text-lg font-bold text-accent-green">
-                      {s.amount ? formatCurrency(s.amount) : 'Varies'}
-                    </span>
-                  </div>
-                ))}
+        {/* Data Grid: 1 Col on Mobile, 2 Cols on Laptop (Restoring "Many Data") */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 bg-secondary/10 p-3 rounded-xl border border-border/30">
+          
+          {/* Acceptance */}
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-background rounded-md shadow-sm">
+                <Percent className="w-3.5 h-3.5 text-muted-foreground" />
               </div>
+              <span className="text-xs text-muted-foreground font-semibold uppercase">Acceptance</span>
             </div>
-          )}
+            <p className={cn("text-lg font-bold pl-1", acceptanceColor)}>
+              {college.acceptanceRate === -1 ? 'N/A' : `${college.acceptanceRate}%`}
+            </p>
+          </div>
 
-          {/* Financial Aid */}
-          <Section title="Financial Aid" icon={DollarSign}>
-            <StatItem label="% of Need Met" value={c.rawNeedStr} highlight={c.needMet >= 90} />
-            <StatItem label="Merit Aid %" value={c.meritAidPercent > 0 ? `${c.meritAidPercent}%` : 'N/A'} />
-            <StatItem label="Avg Merit Award" value={c.avgMeritAward} />
-            <StatItem label="Avg Need-Based Grant" value={c.avgNeedBasedGrant} />
-          </Section>
-
-          {/* Demographics */}
-          <Section title="Demographics" icon={Users}>
-            <StatItem label="Total Enrollment" value={c.enrollment > 0 ? c.enrollment.toLocaleString() : 'N/A'} />
-            <StatItem label="% International" value={c.percentIntl > 0 ? `${c.percentIntl}%` : 'N/A'} />
-            <StatItem label="% Female" value={c.percentFemale} />
-            <StatItem label="% Male" value={c.percentMale} />
-            <StatItem label="% Asian" value={c.percentAsian} />
-            <StatItem label="% African-American" value={c.percentAfrican} />
-            <StatItem label="% Hispanic" value={c.percentHispanic} />
-            <StatItem label="% White" value={c.percentWhite} />
-          </Section>
-
-          {/* Campus */}
-          <Section title="Campus Life" icon={Thermometer}>
-            <StatItem label="Housing Requirement" value={c.housingReq} />
-            <StatItem label="% Living On-Campus" value={c.livingOnCampus} />
-            <StatItem label="Jan Avg Temp" value={c.raw['Avg Jan Temp'] || 'N/A'} />
-            <StatItem label="July Avg Temp" value={c.raw['Avg July Temp'] || 'N/A'} />
-            <StatItem label="Sunny Days/Year" value={c.sunnyDays} />
-            <StatItem label="Precip Days/Year" value={c.precipDays} />
-          </Section>
-
-          {/* Outcomes */}
-          <Section title="Outcomes" icon={TrendingUp}>
-            <StatItem label="Freshman Retention" value={c.retentionRate} highlight={parseFloat(c.retentionRate) > 90} />
-            <StatItem label="4-Year Grad Rate" value={c.gradRate4} />
-            <StatItem label="6-Year Grad Rate" value={c.gradRate6} />
-            <StatItem label="Median Earnings (6yr)" value={c.earnings6yr} />
-            <StatItem label="Median Earnings (10yr)" value={c.earnings10yr} />
-            <StatItem label="20-Year Net ROI" value={c.roi20yr} />
-            {c.csSalary && <StatItem label="CS Starting Salary" value={c.csSalary} />}
-          </Section>
-
-          {/* English Requirements */}
-          {englishData && (
-            <Section title="English Proficiency Requirements" icon={Globe}>
-              <StatItem label="TOEFL" value={englishData.TOEFL} />
-              <StatItem label="IELTS" value={englishData.IELTS} />
-              <StatItem label="Duolingo (DET)" value={englishData.DET} />
-              <div className="col-span-full">
-                <p className="text-xs text-muted-foreground">Other</p>
-                <p className="text-sm">{englishData.Other}</p>
+          {/* Cost */}
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-background rounded-md shadow-sm">
+                <DollarSign className="w-3.5 h-3.5 text-muted-foreground" />
               </div>
-            </Section>
-          )}
+              <span className="text-xs text-muted-foreground font-semibold uppercase">Total Cost</span>
+            </div>
+            <p className="text-lg font-bold pl-1 text-foreground">
+              {college.costOfAttendance > 0 ? formatCurrency(college.costOfAttendance) : 'N/A'}
+            </p>
+          </div>
 
-          {/* Application Requirements */}
-          {requirementsData && (
-            <Section title="Application Requirements" icon={Award}>
-              <StatItem label="Teacher Recommendations" value={requirementsData.teacherRecs.toString()} />
-              <StatItem label="Counselor Recommendation" value={requirementsData.counselorRec ? 'Required' : 'Not Required'} />
-              <StatItem label="School Report" value={requirementsData.schoolReport ? 'Required' : 'Not Required'} />
-              <StatItem label="Supplement Essays" value={hasNoEssay ? 'Not Required' : 'Required'} />
-            </Section>
+          {/* SAT */}
+          <div className="space-y-1 hidden md:block">
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-background rounded-md shadow-sm">
+                <GraduationCap className="w-3.5 h-3.5 text-muted-foreground" />
+              </div>
+              <span className="text-xs text-muted-foreground font-semibold uppercase">SAT Range</span>
+            </div>
+            <p className="text-sm font-medium pl-1">
+              {college.satMath25 > 0 ? `${college.satMath25+college.satRW25}-${college.satMath75+college.satRW75}` : 'Test Optional'}
+            </p>
+          </div>
+
+          {/* Requirements (Mobile Friendly Summary) */}
+          <div className="space-y-1 md:hidden">
+             <div className="flex items-center justify-between text-sm pt-2 border-t border-border/50">
+                <span className="text-muted-foreground">SAT:</span>
+                <span className="font-medium">{college.satMath25 > 0 ? `${college.satMath25+college.satRW25}+` : 'Opt'}</span>
+             </div>
+          </div>
+
+        </div>
+
+        {/* Footer Tags */}
+        <div className="flex flex-wrap gap-2 mt-auto">
+          {hasScoir && (
+            <Badge variant="secondary" className="text-[10px] px-2 h-6 bg-blue-500/10 text-blue-600 border-blue-200">
+              <Send className="w-3 h-3 mr-1" /> Scoir
+            </Badge>
+          )}
+          {noEssay && (
+            <Badge variant="secondary" className="text-[10px] px-2 h-6 bg-emerald-500/10 text-emerald-600 border-emerald-200">
+              <FileText className="w-3 h-3 mr-1" /> No Essay
+            </Badge>
+          )}
+          {englishReq && englishReq !== 'Not Reported' && (
+            <Badge variant="outline" className="text-[10px] px-2 h-6 text-muted-foreground">
+              DET: {englishReq}
+            </Badge>
           )}
         </div>
       </div>
-    </div>
+      
+      {/* Bottom Progress Bar */}
+      <div className="absolute bottom-0 left-0 w-full h-1 bg-secondary group-hover:h-1.5 transition-all">
+        <div 
+          className={cn("h-full", 
+            college.acceptanceRate < 20 ? "bg-red-500" : 
+            college.acceptanceRate < 50 ? "bg-orange-500" : "bg-green-500"
+          )} 
+          style={{ width: `${college.acceptanceRate}%` }} 
+        />
+      </div>
+    </Card>
   );
 };
