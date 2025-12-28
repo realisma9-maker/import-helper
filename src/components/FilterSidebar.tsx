@@ -32,13 +32,21 @@ export const FilterSidebar = ({ filters, setFilters, collapsed, onCloseMobile }:
   return (
     <aside 
       className={cn(
-        "fixed inset-y-0 left-0 z-50 flex flex-col bg-background/95 backdrop-blur-xl border-r border-border transition-all duration-300 ease-in-out shadow-2xl md:shadow-none md:relative",
-        // Mobile Logic: Translate X to hide/show
-        // Desktop Logic: Width 0 to hide, Width 80 to show
-        collapsed ? "-translate-x-full md:translate-x-0 md:w-0 md:border-r-0 md:overflow-hidden" : "translate-x-0 w-[85vw] md:w-80"
+        // Base styles: Fixed on mobile, Flex column, Transitions
+        "fixed inset-y-0 left-0 z-50 flex flex-col bg-background/95 backdrop-blur-xl border-r border-border transition-all duration-300 ease-in-out shadow-2xl md:shadow-none",
+        // Desktop Position: Switch to relative flow so it pushes content
+        "md:relative",
+        // State Logic:
+        // Mobile: Translate off-screen (-translate-x-full)
+        // Desktop: Width becomes 0 (md:w-0) and content clipped (md:overflow-hidden)
+        collapsed 
+          ? "-translate-x-full md:translate-x-0 md:w-0 md:border-r-0 md:overflow-hidden" 
+          : "translate-x-0 w-[85vw] md:w-80"
       )}
     >
-      <div className="w-full h-full flex flex-col min-w-[85vw] md:min-w-80">
+      {/* Inner Container: Holds width rigid so content doesn't squash during transition */}
+      <div className="w-full h-full flex flex-col min-w-[85vw] md:min-w-[20rem]">
+        
         {/* Brand Header */}
         <div className="p-6 border-b border-border flex justify-between items-center bg-card/50">
           <div className="flex items-center gap-3 text-primary">
@@ -151,6 +159,17 @@ export const FilterSidebar = ({ filters, setFilters, collapsed, onCloseMobile }:
                     min={0} max={100} step={10}
                   />
                 </div>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <Label className="text-xs text-muted-foreground">Min Merit Aid Award</Label>
+                    <span className="text-xs font-bold">${(filters.minAvgMerit / 1000).toFixed(0)}k</span>
+                  </div>
+                  <Slider
+                    value={[filters.minAvgMerit]}
+                    onValueChange={([val]) => setFilters(f => ({ ...f, minAvgMerit: val }))}
+                    min={0} max={50000} step={5000}
+                  />
+                </div>
               </AccordionContent>
             </AccordionItem>
 
@@ -180,6 +199,17 @@ export const FilterSidebar = ({ filters, setFilters, collapsed, onCloseMobile }:
                     ))}
                   </div>
                 </div>
+                <div className="space-y-3 mt-4">
+                  <div className="flex justify-between">
+                    <Label className="text-xs text-muted-foreground">Max DET Score</Label>
+                    <span className="text-xs font-bold">{filters.maxDetScore}</span>
+                  </div>
+                  <Slider
+                    value={[filters.maxDetScore]}
+                    onValueChange={([val]) => setFilters(f => ({ ...f, maxDetScore: val }))}
+                    min={100} max={160} step={5}
+                  />
+                </div>
               </AccordionContent>
             </AccordionItem>
 
@@ -203,10 +233,89 @@ export const FilterSidebar = ({ filters, setFilters, collapsed, onCloseMobile }:
                     min={0} max={70} step={5}
                   />
                 </div>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <Label className="text-xs text-muted-foreground">Min Sunny Days</Label>
+                    <span className="text-xs font-bold">{filters.minSunnyDays}</span>
+                  </div>
+                  <Slider
+                    value={[filters.minSunnyDays]}
+                    onValueChange={([val]) => setFilters(f => ({ ...f, minSunnyDays: val }))}
+                    min={0} max={300} step={20}
+                  />
+                </div>
               </AccordionContent>
             </AccordionItem>
 
-            {/* 5. Campus */}
+            {/* 5. Student Body */}
+            <AccordionItem value="demographics" className="border border-border/60 rounded-xl px-4 shadow-sm bg-card">
+              <AccordionTrigger className="hover:no-underline py-4">
+                <div className="flex items-center gap-3 text-sm font-bold">
+                  <div className="p-1.5 bg-purple-500/10 rounded-md"><Users className="w-4 h-4 text-purple-500" /></div>
+                  Student Body
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="space-y-6 pt-2 pb-4">
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <Label className="text-xs text-muted-foreground">Min Enrollment</Label>
+                    <span className="text-xs font-bold">{filters.minEnrollment}+</span>
+                  </div>
+                  <Slider
+                    value={[filters.minEnrollment]}
+                    onValueChange={([val]) => setFilters(f => ({ ...f, minEnrollment: val }))}
+                    min={0} max={30000} step={1000}
+                  />
+                </div>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <Label className="text-xs text-muted-foreground">Min Intl Students %</Label>
+                    <span className="text-xs font-bold">{filters.minIntl}%</span>
+                  </div>
+                  <Slider
+                    value={[filters.minIntl]}
+                    onValueChange={([val]) => setFilters(f => ({ ...f, minIntl: val }))}
+                    min={0} max={30} step={1}
+                  />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* 6. Academics */}
+            <AccordionItem value="academics" className="border border-border/60 rounded-xl px-4 shadow-sm bg-card">
+              <AccordionTrigger className="hover:no-underline py-4">
+                <div className="flex items-center gap-3 text-sm font-bold">
+                  <div className="p-1.5 bg-red-400/10 rounded-md"><BookOpen className="w-4 h-4 text-red-400" /></div>
+                  Academics
+                </div>
+              </AccordionTrigger>
+              <AccordionContent className="space-y-6 pt-2 pb-4">
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <Label className="text-xs text-muted-foreground">Min 4-Year Grad Rate</Label>
+                    <span className="text-xs font-bold">{filters.minGradRate}%</span>
+                  </div>
+                  <Slider
+                    value={[filters.minGradRate]}
+                    onValueChange={([val]) => setFilters(f => ({ ...f, minGradRate: val }))}
+                    min={0} max={100} step={5}
+                  />
+                </div>
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <Label className="text-xs text-muted-foreground">Min Retention Rate</Label>
+                    <span className="text-xs font-bold">{filters.minRetention}%</span>
+                  </div>
+                  <Slider
+                    value={[filters.minRetention]}
+                    onValueChange={([val]) => setFilters(f => ({ ...f, minRetention: val }))}
+                    min={0} max={100} step={5}
+                  />
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+
+            {/* 7. Campus Life */}
             <AccordionItem value="campus" className="border border-border/60 rounded-xl px-4 shadow-sm bg-card">
               <AccordionTrigger className="hover:no-underline py-4">
                 <div className="flex items-center gap-3 text-sm font-bold">
@@ -215,6 +324,17 @@ export const FilterSidebar = ({ filters, setFilters, collapsed, onCloseMobile }:
                 </div>
               </AccordionTrigger>
               <AccordionContent className="space-y-6 pt-2 pb-4">
+                <div className="space-y-3">
+                  <div className="flex justify-between">
+                    <Label className="text-xs text-muted-foreground">Min % Living On-Campus</Label>
+                    <span className="text-xs font-bold">{filters.minOnCampus}%</span>
+                  </div>
+                  <Slider
+                    value={[filters.minOnCampus]}
+                    onValueChange={([val]) => setFilters(f => ({ ...f, minOnCampus: val }))}
+                    min={0} max={100} step={10}
+                  />
+                </div>
                 <div className="flex items-center justify-between border border-border p-2 rounded-lg bg-secondary/10">
                   <Label className="text-xs font-medium cursor-pointer" htmlFor="housing-req">Housing Required</Label>
                   <Switch
