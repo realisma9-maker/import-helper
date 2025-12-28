@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, Sliders, Star, School, Loader2 } from 'lucide-react';
+import { Search, Sliders, School, Loader2, ListFilter } from 'lucide-react';
 import { useCollegeData } from '@/hooks/useCollegeData';
 import { FilterSidebar } from '@/components/FilterSidebar';
 import { CollegeCard } from '@/components/CollegeCard';
@@ -8,6 +8,8 @@ import { HeroSection } from '@/components/HeroSection';
 import { College } from '@/types/college';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { SIAMS_FILTERED_LIST } from '@/data/siams_filtered_list';
 
 import { Helmet } from 'react-helmet';
 
@@ -15,17 +17,23 @@ const Dashboard = () => {
   const [showHero, setShowHero] = useState(true);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [selectedCollege, setSelectedCollege] = useState<College | null>(null);
+  const [activeTab, setActiveTab] = useState('explore');
   
   const { 
     filteredColleges, 
-    curatedColleges, 
     loading, 
     filters, 
     setFilters,
     NO_ESSAY_COLLEGES,
     ENGLISH_PROFICIENCY_DATA,
-    REQUIREMENTS_DATA
+    REQUIREMENTS_DATA,
+    INTERVIEW_DATA,
+    WEBSITE_DATA,
+    SCOIR_FREE_APP
   } = useCollegeData();
+
+  // Filter colleges for Siam's list
+  const siamsColleges = filteredColleges.filter(c => SIAMS_FILTERED_LIST.has(c.name));
 
   if (showHero) {
     return (
@@ -42,6 +50,10 @@ const Dashboard = () => {
   if (selectedCollege) {
     const englishData = ENGLISH_PROFICIENCY_DATA[selectedCollege.name];
     const reqData = REQUIREMENTS_DATA[selectedCollege.name];
+    const interviewData = INTERVIEW_DATA[selectedCollege.name];
+    const websiteUrl = WEBSITE_DATA[selectedCollege.name];
+    const hasScoir = SCOIR_FREE_APP.has(selectedCollege.name);
+    const hasNoEssay = NO_ESSAY_COLLEGES.has(selectedCollege.name);
     
     return (
       <>
@@ -54,10 +66,16 @@ const Dashboard = () => {
           onBack={() => setSelectedCollege(null)}
           englishData={englishData}
           requirementsData={reqData}
+          interviewData={interviewData}
+          websiteUrl={websiteUrl}
+          hasScoir={hasScoir}
+          hasNoEssay={hasNoEssay}
         />
       </>
     );
   }
+
+  const currentColleges = activeTab === 'explore' ? filteredColleges : siamsColleges;
 
   return (
     <>
@@ -99,7 +117,7 @@ const Dashboard = () => {
               />
             </div>
             <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full">
-              <span className="font-bold">{filteredColleges.length}</span>
+              <span className="font-bold">{currentColleges.length}</span>
               <span className="text-sm">Schools Found</span>
             </div>
           </header>
@@ -112,42 +130,25 @@ const Dashboard = () => {
                 <span className="ml-3 text-muted-foreground">Loading universities...</span>
               </div>
             ) : (
-              <>
-                {/* Curated Picks */}
-                {curatedColleges.length > 0 && (
-                  <section className="mb-10">
-                    <div className="flex items-center gap-2 mb-4">
-                      <Star className="w-5 h-5 text-accent-orange" />
-                      <h2 className="font-heading text-xl font-bold">Curated Picks</h2>
-                      <span className="text-sm text-muted-foreground ml-2">
-                        Popular choices for international students
-                      </span>
-                    </div>
-                    <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-                      {curatedColleges.map(college => (
-                        <CollegeCard
-                          key={college.name}
-                          college={college}
-                          isCurated
-                          noEssay={NO_ESSAY_COLLEGES.has(college.name)}
-                          englishReq={ENGLISH_PROFICIENCY_DATA[college.name]?.DET}
-                          onClick={() => setSelectedCollege(college)}
-                        />
-                      ))}
-                    </div>
-                  </section>
-                )}
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="grid w-full max-w-lg grid-cols-2 mb-8 bg-secondary/50 p-1 rounded-xl">
+                  <TabsTrigger 
+                    value="explore" 
+                    className="flex items-center gap-2 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground rounded-lg font-semibold transition-all"
+                  >
+                    <School className="w-4 h-4" />
+                    Explore Universities
+                  </TabsTrigger>
+                  <TabsTrigger 
+                    value="siams" 
+                    className="flex items-center gap-2 data-[state=active]:bg-gradient-to-r data-[state=active]:from-accent-orange data-[state=active]:to-primary data-[state=active]:text-white rounded-lg font-semibold transition-all"
+                  >
+                    <ListFilter className="w-4 h-4" />
+                    Siam's Filtered List
+                  </TabsTrigger>
+                </TabsList>
 
-                {/* All Universities */}
-                <section>
-                  <div className="flex items-center gap-2 mb-4">
-                    <School className="w-5 h-5 text-primary" />
-                    <h2 className="font-heading text-xl font-bold">Explore Universities</h2>
-                    <span className="text-sm text-muted-foreground ml-2">
-                      Browse all universities
-                    </span>
-                  </div>
-                  
+                <TabsContent value="explore" className="mt-0">
                   {filteredColleges.length === 0 ? (
                     <div className="text-center py-16 text-muted-foreground">
                       <School className="w-12 h-12 mx-auto mb-4 opacity-50" />
@@ -155,20 +156,55 @@ const Dashboard = () => {
                       <p className="text-sm mt-2">Try adjusting your filters.</p>
                     </div>
                   ) : (
-                    <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
+                    <div className="grid lg:grid-cols-2 gap-6">
                       {filteredColleges.map(college => (
                         <CollegeCard
                           key={college.name}
                           college={college}
                           noEssay={NO_ESSAY_COLLEGES.has(college.name)}
                           englishReq={ENGLISH_PROFICIENCY_DATA[college.name]?.DET}
+                          hasScoir={SCOIR_FREE_APP.has(college.name)}
                           onClick={() => setSelectedCollege(college)}
                         />
                       ))}
                     </div>
                   )}
-                </section>
-              </>
+                </TabsContent>
+
+                <TabsContent value="siams" className="mt-0">
+                  <div className="mb-6 p-4 bg-gradient-to-r from-accent-orange/10 to-primary/10 rounded-xl border border-accent-orange/20">
+                    <h3 className="font-heading font-bold text-lg flex items-center gap-2">
+                      <ListFilter className="w-5 h-5 text-accent-orange" />
+                      Siam's Curated Selection
+                    </h3>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {siamsColleges.length} carefully selected universities matching your criteria
+                    </p>
+                  </div>
+                  
+                  {siamsColleges.length === 0 ? (
+                    <div className="text-center py-16 text-muted-foreground">
+                      <ListFilter className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>No colleges from Siam's list match your current filters.</p>
+                      <p className="text-sm mt-2">Try adjusting your filters.</p>
+                    </div>
+                  ) : (
+                    <div className="grid lg:grid-cols-2 gap-6">
+                      {siamsColleges.map(college => (
+                        <CollegeCard
+                          key={college.name}
+                          college={college}
+                          noEssay={NO_ESSAY_COLLEGES.has(college.name)}
+                          englishReq={ENGLISH_PROFICIENCY_DATA[college.name]?.DET}
+                          hasScoir={SCOIR_FREE_APP.has(college.name)}
+                          onClick={() => setSelectedCollege(college)}
+                          isSiamsPick
+                        />
+                      ))}
+                    </div>
+                  )}
+                </TabsContent>
+              </Tabs>
             )}
           </div>
         </main>
