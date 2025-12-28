@@ -77,12 +77,42 @@ export interface College {
 
 export interface Filters {
   search: string;
-  deadline: string;
+  
+  // 1. Admissions & Selectivity
   maxAcceptance: number;
   testOptional: boolean;
+  minSatSubmit: number;
+  minActSubmit: number;
+  demonstratedInterest: string; // 'Any', 'Important', 'Considered', 'Not Considered'
+  
+  // 2. Financials & Affordability
   maxCost: number;
   minNeedMet: number;
-  minIntl: number;
-  housingRequired: boolean;
+  minMeritPercent: number;
+  minAvgMerit: number;
+  minRoi: number; // 20-Year Net ROI
+  
+  // 3. Application Details
+  deadline: string;
+  appType: string[]; // ['ED1', 'ED2', 'EA', 'RD']
+  scoirFree: boolean;
+  noEssays: boolean;
+  maxDetScore: number; // For English Proficiency
+  
+  // 4. Location & Environment
   minJanTemp: number;
+  minSunnyDays: number;
+  maxPrecipDays: number;
+  
+  // 5. Student Body
+  minEnrollment: number;
+  minIntl: number;
+  
+  // 6. Academics
+  minGradRate: number;
+  minRetention: number;
+  
+  // 7. Campus Life
+  minOnCampus: number;
+  housingRequired: boolean;
 }
