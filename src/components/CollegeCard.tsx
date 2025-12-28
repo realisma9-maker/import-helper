@@ -1,7 +1,7 @@
 import { College } from '@/types/college';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Clock, MapPin, FileText, Send, DollarSign, GraduationCap, Percent } from 'lucide-react';
+import { Clock, MapPin, FileText, Send, DollarSign, GraduationCap, Percent, CalendarDays } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface CollegeCardProps {
@@ -80,8 +80,8 @@ export const CollegeCard = ({
           </Badge>
         </div>
 
-        {/* Data Grid: 1 Col on Mobile, 2 Cols on Laptop (Rich Data Restored) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 bg-secondary/10 p-3 rounded-xl border border-border/30">
+        {/* Data Grid: 1 Col on Mobile, 2 Cols on Laptop */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3 bg-secondary/10 p-3 rounded-xl border border-border/30">
           
           {/* Acceptance */}
           <div className="space-y-1">
@@ -122,15 +122,37 @@ export const CollegeCard = ({
             </p>
           </div>
 
-          {/* Requirements (Mobile Friendly Summary) */}
-          <div className="space-y-1 md:hidden">
-             <div className="flex items-center justify-between text-sm pt-2 border-t border-border/50">
-                <span className="text-muted-foreground">SAT:</span>
-                <span className="font-medium">{college.satMath25 > 0 ? `${college.satMath25+college.satRW25}+` : 'Opt'}</span>
+          {/* Mobile Only: Simplified SAT/Requirements Row */}
+          <div className="space-y-1 md:hidden pt-1">
+             <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <span>SAT: <span className="font-medium text-foreground">{college.satMath25 > 0 ? `${college.satMath25+college.satRW25}+` : 'Opt'}</span></span>
              </div>
           </div>
-
         </div>
+
+        {/* NEW: Specific Deadlines Row (ED2 & RD) */}
+        {(college.ed2 !== '-' || college.rd !== '-') && (
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mb-4 px-1">
+            <div className="flex items-center gap-1.5 text-xs">
+              <CalendarDays className="w-3.5 h-3.5 text-primary" />
+              <span className="text-muted-foreground font-medium">Deadlines:</span>
+            </div>
+            
+            {college.ed2 && college.ed2 !== '-' && (
+              <div className="text-xs">
+                <span className="text-muted-foreground mr-1">ED II:</span>
+                <span className="font-semibold text-foreground">{college.ed2}</span>
+              </div>
+            )}
+            
+            {college.rd && college.rd !== '-' && (
+              <div className="text-xs">
+                <span className="text-muted-foreground mr-1">RD:</span>
+                <span className="font-semibold text-foreground">{college.rd}</span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Footer Tags */}
         <div className="flex flex-wrap gap-2 mt-auto">
