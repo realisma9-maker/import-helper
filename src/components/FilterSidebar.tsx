@@ -1,6 +1,6 @@
 import { 
   GraduationCap, Clock, Ticket, BadgeDollarSign, CloudSun, 
-  Users, BookOpen, Home, CheckCircle2 
+  Users, BookOpen, Home, CheckCircle2, X 
 } from 'lucide-react';
 import { Filters } from '@/types/college';
 import { Slider } from '@/components/ui/slider';
@@ -8,15 +8,17 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 interface FilterSidebarProps {
   filters: Filters;
   setFilters: React.Dispatch<React.SetStateAction<Filters>>;
   collapsed: boolean;
+  onCloseMobile?: () => void;
 }
 
-export const FilterSidebar = ({ filters, setFilters, collapsed }: FilterSidebarProps) => {
+export const FilterSidebar = ({ filters, setFilters, collapsed, onCloseMobile }: FilterSidebarProps) => {
   
   const handleAppTypeChange = (type: string, checked: boolean) => {
     setFilters(prev => ({
@@ -30,42 +32,46 @@ export const FilterSidebar = ({ filters, setFilters, collapsed }: FilterSidebarP
   return (
     <aside 
       className={cn(
-        "w-80 bg-card/95 backdrop-blur-xl border-r border-border flex flex-col transition-all duration-300 z-10 h-full",
-        collapsed && "w-0 opacity-0 pointer-events-none -translate-x-full"
+        "fixed inset-y-0 left-0 z-50 w-[85vw] md:w-80 bg-background/95 backdrop-blur-xl border-r border-border flex flex-col transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:h-full shadow-2xl md:shadow-none",
+        collapsed ? "-translate-x-full" : "translate-x-0"
       )}
     >
       {/* Brand Header */}
-      <div className="p-6 border-b border-border">
+      <div className="p-6 border-b border-border flex justify-between items-center bg-card/50">
         <div className="flex items-center gap-3 text-primary">
           <GraduationCap className="w-7 h-7" />
           <span className="font-heading font-extrabold text-2xl tracking-tight">SmartApply</span>
         </div>
+        {/* Mobile Close Button */}
+        <Button variant="ghost" size="icon" className="md:hidden" onClick={onCloseMobile}>
+          <X className="w-5 h-5" />
+        </Button>
       </div>
 
       {/* Scrollable Filters */}
-      <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+      <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6 pb-20 md:pb-6">
         
-        {/* Quick Filters */}
-        <div className="mb-6 space-y-3">
-          <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-3 flex items-center gap-2">
-            <CheckCircle2 className="w-4 h-4" /> Quick Filters
+        {/* Quick Filters - Card Style for Mobile */}
+        <div className="bg-secondary/20 p-4 rounded-xl border border-border/50 space-y-4">
+          <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-primary" /> Quick Filters
           </h3>
           <div className="flex items-center justify-between">
-            <Label className="text-sm">Scoir App Free</Label>
+            <Label className="text-sm font-medium">Scoir App Free</Label>
             <Switch
               checked={filters.scoirFree}
               onCheckedChange={(checked) => setFilters(f => ({ ...f, scoirFree: checked }))}
             />
           </div>
           <div className="flex items-center justify-between">
-            <Label className="text-sm">No Supp Essays</Label>
+            <Label className="text-sm font-medium">No Supp Essays</Label>
             <Switch
               checked={filters.noEssays}
               onCheckedChange={(checked) => setFilters(f => ({ ...f, noEssays: checked }))}
             />
           </div>
           <div className="flex items-center justify-between">
-            <Label className="text-sm">Test Optional Only</Label>
+            <Label className="text-sm font-medium">Test Optional</Label>
             <Switch
               checked={filters.testOptional}
               onCheckedChange={(checked) => setFilters(f => ({ ...f, testOptional: checked }))}
@@ -73,228 +79,255 @@ export const FilterSidebar = ({ filters, setFilters, collapsed }: FilterSidebarP
           </div>
         </div>
 
-        <Accordion type="single" collapsible className="w-full space-y-2">
+        <Accordion type="single" collapsible className="w-full space-y-3">
           
           {/* 1. Admissions */}
-          <AccordionItem value="admissions" className="border rounded-xl px-3 shadow-sm bg-card/50">
-            <AccordionTrigger className="hover:no-underline py-3">
-              <div className="flex items-center gap-2 text-sm font-semibold">
-                <Ticket className="w-4 h-4 text-primary" /> Admissions
+          <AccordionItem value="admissions" className="border border-border/60 rounded-xl px-4 shadow-sm bg-card">
+            <AccordionTrigger className="hover:no-underline py-4">
+              <div className="flex items-center gap-3 text-sm font-bold">
+                <div className="p-1.5 bg-primary/10 rounded-md"><Ticket className="w-4 h-4 text-primary" /></div>
+                Admissions
               </div>
             </AccordionTrigger>
-            <AccordionContent className="space-y-4 pt-2">
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Max Acceptance Rate</Label>
+            <AccordionContent className="space-y-6 pt-2 pb-4">
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <Label className="text-xs text-muted-foreground">Max Acceptance Rate</Label>
+                  <span className="text-xs font-bold">{filters.maxAcceptance}%</span>
+                </div>
                 <Slider
                   value={[filters.maxAcceptance]}
                   onValueChange={([val]) => setFilters(f => ({ ...f, maxAcceptance: val }))}
                   min={0} max={100} step={5}
+                  className="py-2"
                 />
-                <p className="text-xs text-right font-medium">{filters.maxAcceptance}%</p>
               </div>
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Min % Submitting SAT</Label>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <Label className="text-xs text-muted-foreground">Min % Submitting SAT</Label>
+                  <span className="text-xs font-bold">{filters.minSatSubmit}%</span>
+                </div>
                 <Slider
                   value={[filters.minSatSubmit]}
                   onValueChange={([val]) => setFilters(f => ({ ...f, minSatSubmit: val }))}
                   min={0} max={100} step={10}
+                  className="py-2"
                 />
-                <p className="text-xs text-right font-medium">{filters.minSatSubmit}%</p>
               </div>
             </AccordionContent>
           </AccordionItem>
 
           {/* 2. Financials */}
-          <AccordionItem value="financials" className="border rounded-xl px-3 shadow-sm bg-card/50">
-            <AccordionTrigger className="hover:no-underline py-3">
-              <div className="flex items-center gap-2 text-sm font-semibold">
-                <BadgeDollarSign className="w-4 h-4 text-green-600" /> Financials
+          <AccordionItem value="financials" className="border border-border/60 rounded-xl px-4 shadow-sm bg-card">
+            <AccordionTrigger className="hover:no-underline py-4">
+              <div className="flex items-center gap-3 text-sm font-bold">
+                <div className="p-1.5 bg-green-500/10 rounded-md"><BadgeDollarSign className="w-4 h-4 text-green-600" /></div>
+                Financials
               </div>
             </AccordionTrigger>
-            <AccordionContent className="space-y-4 pt-2">
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Max Total Cost (COA)</Label>
+            <AccordionContent className="space-y-6 pt-2 pb-4">
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <Label className="text-xs text-muted-foreground">Max Total Cost</Label>
+                  <span className="text-xs font-bold">${(filters.maxCost / 1000).toFixed(0)}k</span>
+                </div>
                 <Slider
                   value={[filters.maxCost]}
                   onValueChange={([val]) => setFilters(f => ({ ...f, maxCost: val }))}
                   min={20000} max={100000} step={2500}
                 />
-                <p className="text-xs text-right font-medium">${(filters.maxCost / 1000).toFixed(0)}k</p>
               </div>
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Min Need Met</Label>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <Label className="text-xs text-muted-foreground">Min Need Met</Label>
+                  <span className="text-xs font-bold">{filters.minNeedMet}%</span>
+                </div>
                 <Slider
                   value={[filters.minNeedMet]}
                   onValueChange={([val]) => setFilters(f => ({ ...f, minNeedMet: val }))}
                   min={0} max={100} step={10}
                 />
-                <p className="text-xs text-right font-medium">{filters.minNeedMet}%</p>
               </div>
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Min Merit Aid Award</Label>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <Label className="text-xs text-muted-foreground">Min Merit Aid Award</Label>
+                  <span className="text-xs font-bold">${(filters.minAvgMerit / 1000).toFixed(0)}k</span>
+                </div>
                 <Slider
                   value={[filters.minAvgMerit]}
                   onValueChange={([val]) => setFilters(f => ({ ...f, minAvgMerit: val }))}
                   min={0} max={50000} step={5000}
                 />
-                <p className="text-xs text-right font-medium">${(filters.minAvgMerit / 1000).toFixed(0)}k+</p>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Min 20-Yr ROI</Label>
-                <Slider
-                  value={[filters.minRoi]}
-                  onValueChange={([val]) => setFilters(f => ({ ...f, minRoi: val }))}
-                  min={0} max={1000000} step={50000}
-                />
-                <p className="text-xs text-right font-medium">${(filters.minRoi / 1000).toFixed(0)}k+</p>
               </div>
             </AccordionContent>
           </AccordionItem>
 
           {/* 3. Applications */}
-          <AccordionItem value="applications" className="border rounded-xl px-3 shadow-sm bg-card/50">
-            <AccordionTrigger className="hover:no-underline py-3">
-              <div className="flex items-center gap-2 text-sm font-semibold">
-                <Clock className="w-4 h-4 text-orange-500" /> Applications
+          <AccordionItem value="applications" className="border border-border/60 rounded-xl px-4 shadow-sm bg-card">
+            <AccordionTrigger className="hover:no-underline py-4">
+              <div className="flex items-center gap-3 text-sm font-bold">
+                <div className="p-1.5 bg-orange-500/10 rounded-md"><Clock className="w-4 h-4 text-orange-500" /></div>
+                Applications
               </div>
             </AccordionTrigger>
-            <AccordionContent className="space-y-4 pt-2">
+            <AccordionContent className="space-y-4 pt-2 pb-4">
               <div className="space-y-2">
                 <Label className="text-xs text-muted-foreground mb-2 block">Application Types</Label>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-3">
                   {['ED1', 'ED2', 'EA', 'RD'].map((type) => (
-                    <div key={type} className="flex items-center space-x-2">
+                    <div key={type} className="flex items-center space-x-2 border border-border p-2 rounded-lg bg-secondary/10">
                       <Checkbox 
                         id={type} 
                         checked={filters.appType.includes(type)}
                         onCheckedChange={(checked) => handleAppTypeChange(type, checked as boolean)}
                       />
-                      <label htmlFor={type} className="text-xs font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      <label htmlFor={type} className="text-xs font-medium leading-none cursor-pointer w-full">
                         {type}
                       </label>
                     </div>
                   ))}
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Max DET Score Req</Label>
+              <div className="space-y-3 mt-4">
+                <div className="flex justify-between">
+                  <Label className="text-xs text-muted-foreground">Max DET Score</Label>
+                  <span className="text-xs font-bold">{filters.maxDetScore}</span>
+                </div>
                 <Slider
                   value={[filters.maxDetScore]}
                   onValueChange={([val]) => setFilters(f => ({ ...f, maxDetScore: val }))}
                   min={100} max={160} step={5}
                 />
-                <p className="text-xs text-right font-medium">{filters.maxDetScore}</p>
               </div>
             </AccordionContent>
           </AccordionItem>
 
           {/* 4. Location */}
-          <AccordionItem value="location" className="border rounded-xl px-3 shadow-sm bg-card/50">
-            <AccordionTrigger className="hover:no-underline py-3">
-              <div className="flex items-center gap-2 text-sm font-semibold">
-                <CloudSun className="w-4 h-4 text-blue-400" /> Location
+          <AccordionItem value="location" className="border border-border/60 rounded-xl px-4 shadow-sm bg-card">
+            <AccordionTrigger className="hover:no-underline py-4">
+              <div className="flex items-center gap-3 text-sm font-bold">
+                <div className="p-1.5 bg-blue-400/10 rounded-md"><CloudSun className="w-4 h-4 text-blue-400" /></div>
+                Location & Weather
               </div>
             </AccordionTrigger>
-            <AccordionContent className="space-y-4 pt-2">
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Min Jan Temp (°F)</Label>
+            <AccordionContent className="space-y-6 pt-2 pb-4">
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <Label className="text-xs text-muted-foreground">Min Jan Temp (°F)</Label>
+                  <span className="text-xs font-bold">{filters.minJanTemp}°F</span>
+                </div>
                 <Slider
                   value={[filters.minJanTemp]}
                   onValueChange={([val]) => setFilters(f => ({ ...f, minJanTemp: val }))}
                   min={0} max={70} step={5}
                 />
-                <p className="text-xs text-right font-medium">{filters.minJanTemp}°F</p>
               </div>
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Min Sunny Days</Label>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <Label className="text-xs text-muted-foreground">Min Sunny Days</Label>
+                  <span className="text-xs font-bold">{filters.minSunnyDays}</span>
+                </div>
                 <Slider
                   value={[filters.minSunnyDays]}
                   onValueChange={([val]) => setFilters(f => ({ ...f, minSunnyDays: val }))}
                   min={0} max={300} step={20}
                 />
-                <p className="text-xs text-right font-medium">{filters.minSunnyDays}+</p>
               </div>
             </AccordionContent>
           </AccordionItem>
 
-          {/* 5. Demographics */}
-          <AccordionItem value="demographics" className="border rounded-xl px-3 shadow-sm bg-card/50">
-            <AccordionTrigger className="hover:no-underline py-3">
-              <div className="flex items-center gap-2 text-sm font-semibold">
-                <Users className="w-4 h-4 text-purple-500" /> Student Body
+          {/* 5. Student Body */}
+          <AccordionItem value="demographics" className="border border-border/60 rounded-xl px-4 shadow-sm bg-card">
+            <AccordionTrigger className="hover:no-underline py-4">
+              <div className="flex items-center gap-3 text-sm font-bold">
+                <div className="p-1.5 bg-purple-500/10 rounded-md"><Users className="w-4 h-4 text-purple-500" /></div>
+                Student Body
               </div>
             </AccordionTrigger>
-            <AccordionContent className="space-y-4 pt-2">
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Min Enrollment</Label>
+            <AccordionContent className="space-y-6 pt-2 pb-4">
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <Label className="text-xs text-muted-foreground">Min Enrollment</Label>
+                  <span className="text-xs font-bold">{filters.minEnrollment}+</span>
+                </div>
                 <Slider
                   value={[filters.minEnrollment]}
                   onValueChange={([val]) => setFilters(f => ({ ...f, minEnrollment: val }))}
                   min={0} max={30000} step={1000}
                 />
-                <p className="text-xs text-right font-medium">{filters.minEnrollment}+</p>
               </div>
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Min Intl Students %</Label>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <Label className="text-xs text-muted-foreground">Min Intl Students %</Label>
+                  <span className="text-xs font-bold">{filters.minIntl}%</span>
+                </div>
                 <Slider
                   value={[filters.minIntl]}
                   onValueChange={([val]) => setFilters(f => ({ ...f, minIntl: val }))}
                   min={0} max={30} step={1}
                 />
-                <p className="text-xs text-right font-medium">{filters.minIntl}%</p>
               </div>
             </AccordionContent>
           </AccordionItem>
 
           {/* 6. Academics */}
-          <AccordionItem value="academics" className="border rounded-xl px-3 shadow-sm bg-card/50">
-            <AccordionTrigger className="hover:no-underline py-3">
-              <div className="flex items-center gap-2 text-sm font-semibold">
-                <BookOpen className="w-4 h-4 text-red-400" /> Academics
+          <AccordionItem value="academics" className="border border-border/60 rounded-xl px-4 shadow-sm bg-card">
+            <AccordionTrigger className="hover:no-underline py-4">
+              <div className="flex items-center gap-3 text-sm font-bold">
+                <div className="p-1.5 bg-red-400/10 rounded-md"><BookOpen className="w-4 h-4 text-red-400" /></div>
+                Academics
               </div>
             </AccordionTrigger>
-            <AccordionContent className="space-y-4 pt-2">
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Min 4-Year Grad Rate</Label>
+            <AccordionContent className="space-y-6 pt-2 pb-4">
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <Label className="text-xs text-muted-foreground">Min 4-Year Grad Rate</Label>
+                  <span className="text-xs font-bold">{filters.minGradRate}%</span>
+                </div>
                 <Slider
                   value={[filters.minGradRate]}
                   onValueChange={([val]) => setFilters(f => ({ ...f, minGradRate: val }))}
                   min={0} max={100} step={5}
                 />
-                <p className="text-xs text-right font-medium">{filters.minGradRate}%</p>
               </div>
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Min Retention Rate</Label>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <Label className="text-xs text-muted-foreground">Min Retention Rate</Label>
+                  <span className="text-xs font-bold">{filters.minRetention}%</span>
+                </div>
                 <Slider
                   value={[filters.minRetention]}
                   onValueChange={([val]) => setFilters(f => ({ ...f, minRetention: val }))}
                   min={0} max={100} step={5}
                 />
-                <p className="text-xs text-right font-medium">{filters.minRetention}%</p>
               </div>
             </AccordionContent>
           </AccordionItem>
 
-          {/* 7. Campus */}
-          <AccordionItem value="campus" className="border rounded-xl px-3 shadow-sm bg-card/50">
-            <AccordionTrigger className="hover:no-underline py-3">
-              <div className="flex items-center gap-2 text-sm font-semibold">
-                <Home className="w-4 h-4 text-indigo-500" /> Campus Life
+          {/* 7. Campus Life */}
+          <AccordionItem value="campus" className="border border-border/60 rounded-xl px-4 shadow-sm bg-card">
+            <AccordionTrigger className="hover:no-underline py-4">
+              <div className="flex items-center gap-3 text-sm font-bold">
+                <div className="p-1.5 bg-indigo-500/10 rounded-md"><Home className="w-4 h-4 text-indigo-500" /></div>
+                Campus Life
               </div>
             </AccordionTrigger>
-            <AccordionContent className="space-y-4 pt-2">
-              <div className="space-y-2">
-                <Label className="text-xs text-muted-foreground">Min % Living On-Campus</Label>
+            <AccordionContent className="space-y-6 pt-2 pb-4">
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <Label className="text-xs text-muted-foreground">Min % Living On-Campus</Label>
+                  <span className="text-xs font-bold">{filters.minOnCampus}%</span>
+                </div>
                 <Slider
                   value={[filters.minOnCampus]}
                   onValueChange={([val]) => setFilters(f => ({ ...f, minOnCampus: val }))}
                   min={0} max={100} step={10}
                 />
-                <p className="text-xs text-right font-medium">{filters.minOnCampus}%</p>
               </div>
-              <div className="flex items-center justify-between">
-                <Label className="text-xs">Housing Required</Label>
+              <div className="flex items-center justify-between border border-border p-2 rounded-lg bg-secondary/10">
+                <Label className="text-xs font-medium cursor-pointer" htmlFor="housing-req">Housing Required</Label>
                 <Switch
+                  id="housing-req"
                   checked={filters.housingRequired}
                   onCheckedChange={(checked) => setFilters(f => ({ ...f, housingRequired: checked }))}
                 />
