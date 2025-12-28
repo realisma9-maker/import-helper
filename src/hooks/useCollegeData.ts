@@ -11,6 +11,7 @@ import { CURATED_UNIVERSITIES } from '@/data/curated_data';
 import { INTERVIEW_DATA } from '@/data/interview_data';
 import { WEBSITE_DATA } from '@/data/website_data';
 import { COST_BREAKDOWN_DATA } from '@/data/cost_breakdown_data';
+import { useToast } from '@/hooks/use-toast';
 
 const parseNum = (val: string | undefined, isPercent = false): number => {
   if (!val || val === 'Not Reported' || val === 'N/A' || val.includes('Test Blind')) return -1;
@@ -32,98 +33,123 @@ const parseRange = (val: string | undefined): { min: number; max: number } => {
 export const useCollegeData = () => {
   const [allColleges, setAllColleges] = useState<College[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
   
   // Comprehensive Initial Filters
   const [filters, setFilters] = useState<Filters>({
     search: '',
-    
-    // Admissions
     maxAcceptance: 100,
     testOptional: false,
     minSatSubmit: 0,
     minActSubmit: 0,
     demonstratedInterest: 'Any',
-    
-    // Financials
     maxCost: 100000,
     minNeedMet: 0,
     minMeritPercent: 0,
     minAvgMerit: 0,
     minRoi: 0,
-    
-    // Application
     deadline: 'all',
     appType: [],
     scoirFree: false,
     noEssays: false,
     maxDetScore: 160,
-    
-    // Location
     minJanTemp: 0,
     minSunnyDays: 0,
     maxPrecipDays: 365,
-    
-    // Demographics
     minEnrollment: 0,
     minIntl: 0,
-    
-    // Academics
     minGradRate: 0,
     minRetention: 0,
-    
-    // Campus
     minOnCampus: 0,
     housingRequired: false
   });
 
   useEffect(() => {
     const loadData = async () => {
-      // Parse deadlines
-      const deadlinesMap: Record<string, any> = {};
-      Papa.parse(APP_DEADLINES_CSV, {
-        header: true,
-        skipEmptyLines: true,
-        complete: (results) => {
-          results.data.forEach((row: any) => {
-            if (row['University']) {
-              deadlinesMap[row['University'].trim()] = row;
-            }
-          });
-        }
-      });
+      try {
+        setLoading(true);
+        // Parse deadlines
+        const deadlinesMap: Record<string, any> = {};
+        Papa.parse(APP_DEADLINES_CSV, {
+          header: true,
+          skipEmptyLines: true,
+          complete: (results) => {
+            results.data.forEach((row: any) => {
+              if (row['University']) {
+                deadlinesMap[row['University'].trim()] = row;
+              }
+            });
+          },
+          error: (err) => {
+            console.error("Error parsing deadlines:", err);
+            setError("Failed to load application deadlines.");
+          }
+        });
 
-      // Parse cost data
-      const costMap: Record<string, any> = {};
-      Papa.parse(COST_DATA_CSV, {
-        header: true,
-        skipEmptyLines: true,
-        complete: (results) => {
-          results.data.forEach((row: any) => {
-            if (row['University']) {
-              costMap[row['University'].trim()] = row;
-            }
-          });
-        }
-      });
+        // Parse cost data
+        const costMap: Record<string, any> = {};
+        Papa.parse(COST_DATA_CSV, {
+          header: true,
+          skipEmptyLines: true,
+          complete: (results) => {
+            results.data.forEach((row: any) => {
+              if (row['University']) {
+                costMap[row['University'].trim()] = row;
+              }
+            });
+          },
+          error: (err) => {
+            console.error("Error parsing cost data:", err);
+            // Non-critical, continue
+          }
+        });
 
-      // Parse main college data
-      Papa.parse(COLLEGE_CSV_DATA, {
-        header: true,
-        skipEmptyLines: true,
-        complete: (results) => {
-          const colleges = results.data
-            .map((row: any) => processCollegeRow(row, deadlinesMap, costMap))
-            .filter((c): c is College => c !== null && c.name !== '');
-          
-          colleges.sort((a, b) => a.daysLeft - b.daysLeft);
-          setAllColleges(colleges);
-          setLoading(false);
-        }
-      });
+        // Parse main college data
+        Papa.parse(COLLEGE_CSV_DATA, {
+          header: true,
+          skipEmptyLines: true,
+          complete: (results) => {
+            try {
+              const colleges = results.data
+                .map((row: any) => processCollegeRow(row, deadlinesMap, costMap))
+                .filter((c): c is College => c !== null && c.name !== '');
+              
+              colleges.sort((a, b) => a.daysLeft - b.daysLeft);
+              setAllColleges(colleges);
+              setLoading(false);
+            } catch (processError) {
+              console.error("Error processing college data:", processError);
+              setError("An error occurred while processing university data.");
+              setLoading(false);
+            }
+          },
+          error: (err) => {
+            console.error("Error parsing main data:", err);
+            setError("Failed to load university database. Please try refreshing.");
+            setLoading(false);
+          }
+        });
+      } catch (e) {
+        console.error("Unexpected error:", e);
+        setError("An unexpected error occurred.");
+        setLoading(false);
+      }
     };
 
     loadData();
   }, []);
+
+  // Show toast on error
+  useEffect(() => {
+    if (error) {
+      toast({
+        variant: "destructive",
+        title: "Error Loading Data",
+        description: error,
+      });
+    }
+  }, [error, toast]);
 
   const processCollegeRow = (
     row: Record<string, string>, 
@@ -267,7 +293,7 @@ export const useCollegeData = () => {
         }
       }
 
-      // 1. Admissions & Selectivity
+      // 1. Admissions
       if (filters.maxAcceptance < 100 && c.acceptanceRate !== -1 && c.acceptanceRate > filters.maxAcceptance) return false;
       if (filters.testOptional) {
         const subSAT = parseFloat(c.percentSubmittingSAT);
@@ -286,7 +312,7 @@ export const useCollegeData = () => {
         if (!c.demonstratedInterest.includes(filters.demonstratedInterest)) return false;
       }
 
-      // 2. Financials & Affordability
+      // 2. Financials
       if (filters.maxCost < 100000 && c.costOfAttendance !== -1 && c.costOfAttendance > filters.maxCost) return false;
       if (filters.minNeedMet > 0 && c.needMet !== -1 && c.needMet < filters.minNeedMet) return false;
       if (filters.minMeritPercent > 0 && c.meritAidPercent !== -1 && c.meritAidPercent < filters.minMeritPercent) return false;
@@ -299,7 +325,7 @@ export const useCollegeData = () => {
         if (val !== -1 && val < filters.minRoi) return false;
       }
 
-      // 3. Application Details
+      // 3. Application
       if (filters.scoirFree && !SCOIR_FREE_APP.has(c.name)) return false;
       if (filters.noEssays && !NO_ESSAY_COLLEGES.has(c.name)) return false;
       if (filters.maxDetScore < 160) {
@@ -315,7 +341,8 @@ export const useCollegeData = () => {
         if (filters.appType.includes('RD') && c.rd !== '-') hasType = true;
         if (!hasType) return false;
       }
-      // Existing Deadline Month filter
+      
+      // Deadline Month
       if (filters.deadline !== 'all' && c.deadlineDate) {
         const m = c.deadlineDate.getMonth();
         const d = c.deadlineDate.getDate();
@@ -336,7 +363,7 @@ export const useCollegeData = () => {
         if (val !== -1 && val > filters.maxPrecipDays) return false;
       }
 
-      // 5. Student Body
+      // 5. Demographics
       if (filters.minEnrollment > 0 && c.enrollment !== -1 && c.enrollment < filters.minEnrollment) return false;
       if (filters.minIntl > 0 && c.percentIntl !== -1 && c.percentIntl < filters.minIntl) return false;
 
@@ -374,6 +401,7 @@ export const useCollegeData = () => {
     filteredColleges,
     curatedColleges,
     loading,
+    error,
     filters,
     setFilters,
     NO_ESSAY_COLLEGES,
