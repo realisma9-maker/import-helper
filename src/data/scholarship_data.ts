@@ -78,9 +78,8 @@ export const SCOIR_FREE_APP = new Set([
     "St Olaf College", "The College of Wooster", "Trinity University"
 ]);
 
-// Scholarship Data - Name, Amount, Deadline (Comprehensive List)
+// Scholarship Data - Name, Amount, Deadline (Corrected List)
 export const SCHOLARSHIP_DATA: Record<string, Array<{ name: string; amount: number | null; deadline: string }>> = {
-    // Week 2
     "Vassar College": [{ name: "Full-Ride Scholarship", amount: 89270, deadline: "January 01, 2026" }],
     "Yale University": [{ name: "Yale Scholarship", amount: 90550, deadline: "January 02, 2026" }],
     "Swarthmore College": [{ name: "Grant Aid", amount: null, deadline: "January 04, 2026" }],
@@ -114,8 +113,6 @@ export const SCHOLARSHIP_DATA: Record<string, Array<{ name: string; amount: numb
     "Harvey Mudd College": [{ name: "Full-Ride Scholarship", amount: 98984, deadline: "February 01, 2026" }],
     "Washington and Lee University": [{ name: "Need-Based Full Ride", amount: 90100, deadline: "February 15, 2026" }],
     "University of Redlands": [{ name: "Hunsaker Scholarship", amount: 76338, deadline: "February 28, 2026" }],
-    
-    // Week 3
     "Rhodes College": [{ name: "Merit Scholarship", amount: 37000, deadline: "January 15, 2026" }],
     "Gettysburg College": [
         { name: "Merit Scholarship", amount: 43000, deadline: "January 15, 2026" },
@@ -135,8 +132,6 @@ export const SCHOLARSHIP_DATA: Record<string, Array<{ name: string; amount: numb
     ],
     "Barry University": [{ name: "Merit Scholarship", amount: 20000, deadline: "February 01, 2026" }],
     "University of Texas at Arlington": [{ name: "Merit Scholarship", amount: 10000, deadline: "February 15, 2026" }],
-    
-    // Week 4
     "Wofford College": [{ name: "Merit Scholarship", amount: 22500, deadline: "January 15, 2026" }],
     "Kenyon College": [
         { name: "Honor and Science Scholarships", amount: 25000, deadline: "January 15, 2026" },
@@ -167,8 +162,6 @@ export const SCHOLARSHIP_DATA: Record<string, Array<{ name: string; amount: numb
         { name: "Merit Scholarship", amount: 37000, deadline: "March 01, 2026" },
         { name: "Talent Scholarship", amount: 40000, deadline: "March 01, 2026" }
     ],
-    
-    // Week 5
     "Saint Martin's University": [{ name: "Benedictine Scholarship", amount: 18000, deadline: "January 01, 2026" }],
     "Concordia College (Moorhead)": [{ name: "Fine Arts Scholarship", amount: 3500, deadline: "January 15, 2026" }],
     "University of San Francisco": [{ name: "Merit-Based Scholarship", amount: 22000, deadline: "January 15, 2026" }],
@@ -178,7 +171,7 @@ export const SCHOLARSHIP_DATA: Record<string, Array<{ name: string; amount: numb
     ],
     "University of South Florida": [{ name: "International Academic Award", amount: 10000, deadline: "January 15, 2026" }],
     "Trinity College": [{ name: "Global Scholars Program", amount: 85000, deadline: "January 15, 2026" }],
-    "University of Alabama": [{ name: "International Merit Scholarship", amount: 17000, deadline: "January 15, 2026" }],
+    "The University of Alabama": [{ name: "International Merit Scholarship", amount: 17000, deadline: "January 15, 2026" }],
     "University of Dayton": [{ name: "International Ambassador Award", amount: 20000, deadline: "January 15, 2026" }],
     "University of Colorado Boulder": [{ name: "International Merit Award", amount: 9500, deadline: "January 15, 2026" }],
     "SUNY Albany": [{ name: "Global Achievement Scholarship", amount: null, deadline: "January 15, 2026" }],
@@ -194,8 +187,6 @@ export const SCHOLARSHIP_DATA: Record<string, Array<{ name: string; amount: numb
     "Oklahoma State University": [{ name: "International Leadership Scholarship", amount: null, deadline: "February 01, 2026" }],
     "Western Michigan University": [{ name: "International Presidential Scholarship", amount: 5000, deadline: "March 01, 2026" }],
     "University of Mississippi": [{ name: "International Student Scholarship", amount: 23454, deadline: "April 01, 2026" }],
-    
-    // Week 6
     "Temple University": [
         { name: "Merit Scholarship", amount: 20000, deadline: "February 01, 2026" },
         { name: "#YouAreWelcomeHere Scholarship", amount: 20000, deadline: "February 01, 2026" },
@@ -207,8 +198,6 @@ export const SCHOLARSHIP_DATA: Record<string, Array<{ name: string; amount: numb
     ],
     "University of Oregon": [{ name: "International Cultural Service Program", amount: 15000, deadline: "February 14, 2026" }],
     "The College of Idaho": [{ name: "Academic Merit Scholarship", amount: 24000, deadline: "February 15, 2026" }],
-    
-    // Week 7
     "Syracuse University": [
         { name: "College Scholarship", amount: 30000, deadline: "January 01, 2026" },
         { name: "Founders' Scholarship", amount: 20000, deadline: "January 15, 2026" }
@@ -217,20 +206,14 @@ export const SCHOLARSHIP_DATA: Record<string, Array<{ name: string; amount: numb
     "Drexel University": [{ name: "Global Scholar Award", amount: 27000, deadline: "January 15, 2026" }],
     "Brandeis University": [{ name: "Wien International Scholarship Program", amount: 40000, deadline: "January 15, 2026" }],
     "Stevens Institute of Technology": [{ name: "International Student Scholarship", amount: 35000, deadline: "January 15, 2026" }],
-    
-    // Week 8
     "University of California, Davis": [{ name: "Regents Scholarship", amount: null, deadline: "January 15, 2026" }],
     "University of California, Irvine": [{ name: "Regents Scholarship", amount: null, deadline: "January 15, 2026" }],
     "UMass Amherst": [{ name: "Provost Scholarship", amount: 20000, deadline: "January 15, 2026" }],
     "Virginia Commonwealth University": [{ name: "Presidential Scholarship", amount: 15000, deadline: "February 01, 2026" }],
-    
-    // Week 9
     "UMBC": [{ name: "Dean's Scholarships", amount: 12000, deadline: "January 15, 2026" }],
     "University of Hartford": [{ name: "Trustee Scholarship", amount: null, deadline: "January 15, 2026" }],
     "UNC Greensboro": [{ name: "Presidential Scholarship", amount: 20000, deadline: "February 01, 2026" }],
     "University of New Mexico": [{ name: "Provost Scholarship", amount: 10000, deadline: "March 01, 2026" }],
-    
-    // Week 10
     "Gonzaga University": [{ name: "Dean's Scholarships", amount: 20000, deadline: "January 15, 2026" }],
     "Seattle University": [{ name: "Merit Scholarship", amount: 20000, deadline: "January 15, 2026" }],
     "Fairfield University": [{ name: "Provost Merit Award", amount: 25000, deadline: "January 15, 2026" }],
@@ -238,33 +221,22 @@ export const SCHOLARSHIP_DATA: Record<string, Array<{ name: string; amount: numb
         { name: "Global Studies Scholarship", amount: 20000, deadline: "February 01, 2026" },
         { name: "International Student Scholarship", amount: 18000, deadline: "February 01, 2026" }
     ],
-    
-    // Week 11
     "University of San Diego": [{ name: "Dean's Scholarships", amount: 30000, deadline: "January 15, 2026" }],
     "Villanova University": [{ name: "Trustee Scholarship", amount: null, deadline: "January 15, 2026" }],
     "Creighton University": [{ name: "President's Scholarship", amount: 24000, deadline: "January 15, 2026" }],
     "Quinnipiac University": [{ name: "Merit Scholarship", amount: 30000, deadline: "February 01, 2026" }],
     "University of Colorado Denver": [{ name: "Chancellor's Scholarship", amount: 15000, deadline: "February 01, 2026" }],
-    
-    // Week 12
     "Wichita State University": [{ name: "Presidential Scholarship", amount: 10000, deadline: "February 01, 2026" }],
-    
-    // Week 13
     "UNC Charlotte": [{ name: "Presidential Scholarship", amount: null, deadline: "January 01, 2026" }],
     "University of Houston": [{ name: "Academic Excellence Scholarship", amount: 20000, deadline: "January 15, 2026" }],
     "Stony Brook University": [{ name: "Provost Scholarship", amount: 12000, deadline: "January 15, 2026" }],
     "Illinois State University": [{ name: "Dean's Award", amount: 10000, deadline: "February 01, 2026" }],
     "Ball State University": [{ name: "Merit Scholarship", amount: 12000, deadline: "February 01, 2026" }],
     "Kennesaw State University": [{ name: "President's Scholarship", amount: 10000, deadline: "February 01, 2026" }],
-    
-    // Week 14
     "USF St. Petersburg": [{ name: "Chancellor's Scholar Award", amount: 10000, deadline: "February 01, 2026" }],
     "University of Alabama at Birmingham": [{ name: "Honors Scholarship", amount: 10000, deadline: "March 01, 2026" }],
-    
-    // Week 15
     "New Mexico State University": [{ name: "Regents Scholarship", amount: null, deadline: "January 15, 2026" }],
     "Samford University": [{ name: "President's Scholarship", amount: 24000, deadline: "January 15, 2026" }],
     "Northern Arizona University": [{ name: "Dean's Scholarships", amount: 12000, deadline: "February 01, 2026" }],
     "University of Central Oklahoma": [{ name: "International Scholarship", amount: 10000, deadline: "March 01, 2026" }]
 };
-
