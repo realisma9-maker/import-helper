@@ -1,4 +1,4 @@
-import { ArrowLeft, MapPin, GraduationCap, Users, DollarSign, Thermometer, TrendingUp, Award, BookOpen, Globe } from 'lucide-react';
+import { ArrowLeft, MapPin, GraduationCap, Users, DollarSign, Thermometer, TrendingUp, Award, BookOpen, Globe, ExternalLink, Video, PenOff, FileText, Wallet } from 'lucide-react';
 import { College } from '@/types/college';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -8,17 +8,21 @@ interface CollegeDetailProps {
   onBack: () => void;
   englishData?: { TOEFL: string; IELTS: string; DET: string; Other: string };
   requirementsData?: { teacherRecs: number; counselorRec: boolean; schoolReport: boolean };
+  interviewData?: { admOfficer: boolean; alumni: boolean };
+  websiteUrl?: string;
+  hasScoir?: boolean;
+  hasNoEssay?: boolean;
 }
 
-const StatItem = ({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) => (
-  <div className="space-y-1">
+const StatItem = ({ label, value, highlight, className }: { label: string; value: string; highlight?: boolean; className?: string }) => (
+  <div className={cn("space-y-1", className)}>
     <p className="text-xs text-muted-foreground">{label}</p>
     <p className={cn("font-semibold", highlight && "text-accent-green")}>{value}</p>
   </div>
 );
 
-const Section = ({ title, icon: Icon, children }: { title: string; icon: React.ElementType; children: React.ReactNode }) => (
-  <div className="bg-card rounded-2xl p-6 shadow-card">
+const Section = ({ title, icon: Icon, children, className }: { title: string; icon: React.ElementType; children: React.ReactNode; className?: string }) => (
+  <div className={cn("bg-card rounded-2xl p-6 shadow-card", className)}>
     <h2 className="flex items-center gap-2 font-heading text-lg font-bold mb-4">
       <Icon className="w-5 h-5 text-primary" />
       {title}
@@ -29,12 +33,21 @@ const Section = ({ title, icon: Icon, children }: { title: string; icon: React.E
   </div>
 );
 
-export const CollegeDetail = ({ college, onBack, englishData, requirementsData }: CollegeDetailProps) => {
+export const CollegeDetail = ({ 
+  college, 
+  onBack, 
+  englishData, 
+  requirementsData,
+  interviewData,
+  websiteUrl,
+  hasScoir,
+  hasNoEssay
+}: CollegeDetailProps) => {
   const c = college;
 
   return (
     <div className="min-h-screen bg-app-gradient">
-      <div className="max-w-5xl mx-auto px-6 py-8">
+      <div className="max-w-6xl mx-auto px-6 py-8">
         {/* Back Button */}
         <Button
           variant="ghost"
@@ -47,13 +60,40 @@ export const CollegeDetail = ({ college, onBack, englishData, requirementsData }
 
         {/* Header */}
         <div className="bg-card rounded-2xl p-8 shadow-card mb-6">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <div>
+          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+            <div className="flex-1">
               <h1 className="font-heading text-3xl font-extrabold text-foreground">{c.name}</h1>
               <p className="flex items-center gap-2 text-muted-foreground mt-2">
                 <MapPin className="w-4 h-4" />
                 {c.location}
               </p>
+              
+              {/* Quick badges */}
+              <div className="flex flex-wrap gap-2 mt-4">
+                {hasNoEssay && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-accent-green-light text-accent-green text-sm font-medium rounded-full">
+                    <PenOff className="w-4 h-4" /> No Supplement Essays
+                  </span>
+                )}
+                {hasScoir && (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 text-sm font-medium rounded-full">
+                    <ExternalLink className="w-4 h-4" /> Free App via Scoir
+                  </span>
+                )}
+              </div>
+              
+              {/* Website Link */}
+              {websiteUrl && (
+                <a 
+                  href={websiteUrl} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-colors font-medium"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Visit Official Website
+                </a>
+              )}
             </div>
             <div className={cn(
               "flex flex-col items-center justify-center px-6 py-4 rounded-xl min-w-[100px] text-center",
@@ -84,6 +124,33 @@ export const CollegeDetail = ({ college, onBack, englishData, requirementsData }
             <StatItem label="ACT (25-75th)" value={c.act25 > 0 ? `${c.act25}-${c.act75}` : 'N/A'} />
           </Section>
 
+          {/* Test Score Submission */}
+          <Section title="Test Score Submission" icon={FileText}>
+            <StatItem label="% Submitting SAT" value={c.percentSubmittingSAT} />
+            <StatItem label="% Submitting ACT" value={c.percentSubmittingACT} />
+            <StatItem label="Test Policy" value={c.percentSubmittingSAT.includes('Blind') ? 'Test Blind' : (parseFloat(c.percentSubmittingSAT) < 50 ? 'Test Optional' : 'Test Required/Recommended')} />
+          </Section>
+
+          {/* Interview Info */}
+          {interviewData && (
+            <Section title="Interview Options" icon={Video}>
+              <StatItem 
+                label="Admissions Officer Interview" 
+                value={interviewData.admOfficer ? 'Available' : 'Not Offered'} 
+                highlight={interviewData.admOfficer}
+              />
+              <StatItem 
+                label="Alumni Interview" 
+                value={interviewData.alumni ? 'Available' : 'Not Offered'} 
+                highlight={interviewData.alumni}
+              />
+              <StatItem 
+                label="Interview Required" 
+                value={interviewData.admOfficer || interviewData.alumni ? 'Optional/Recommended' : 'Not Required'} 
+              />
+            </Section>
+          )}
+
           {/* Application Deadlines */}
           <Section title="Application Deadlines" icon={BookOpen}>
             <StatItem label="Early Action I" value={c.ea1} />
@@ -93,9 +160,18 @@ export const CollegeDetail = ({ college, onBack, englishData, requirementsData }
             <StatItem label="Regular Decision" value={c.rd} />
           </Section>
 
-          {/* Financial */}
+          {/* Full Cost Breakdown */}
+          <Section title="Full Cost Breakdown" icon={Wallet}>
+            <StatItem label="Total Cost of Attendance" value={c.costDisplay} />
+            <StatItem label="Estimated Tuition & Fees" value={c.raw['Tuition and Fees'] || c.costDisplay.split('/')[0] || 'N/A'} />
+            <StatItem label="Room & Board" value={c.raw['Room and Board'] || 'N/A'} />
+            <StatItem label="Books & Supplies" value={c.raw['Books and Supplies'] || '~$1,000'} />
+            <StatItem label="Personal Expenses" value={c.raw['Personal Expenses'] || 'Varies'} />
+            <StatItem label="In-State vs Out-of-State" value={c.costDisplay.includes('/') ? 'Different rates' : 'Same for all'} />
+          </Section>
+
+          {/* Financial Aid */}
           <Section title="Financial Aid" icon={DollarSign}>
-            <StatItem label="Cost of Attendance" value={c.costDisplay} />
             <StatItem label="% of Need Met" value={c.rawNeedStr} highlight={c.needMet >= 90} />
             <StatItem label="Merit Aid %" value={c.meritAidPercent > 0 ? `${c.meritAidPercent}%` : 'N/A'} />
             <StatItem label="Avg Merit Award" value={c.avgMeritAward} />
@@ -154,6 +230,7 @@ export const CollegeDetail = ({ college, onBack, englishData, requirementsData }
               <StatItem label="Teacher Recommendations" value={requirementsData.teacherRecs.toString()} />
               <StatItem label="Counselor Recommendation" value={requirementsData.counselorRec ? 'Required' : 'Not Required'} />
               <StatItem label="School Report" value={requirementsData.schoolReport ? 'Required' : 'Not Required'} />
+              <StatItem label="Supplement Essays" value={hasNoEssay ? 'Not Required' : 'Required'} />
             </Section>
           )}
         </div>
