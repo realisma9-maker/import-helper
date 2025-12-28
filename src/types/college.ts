@@ -73,6 +73,7 @@ export interface College {
   
   // Raw data
   raw: Record<string, string>;
+  privateSchool?: boolean; // Optional flag if derived
 }
 
 export interface Filters {
@@ -80,24 +81,25 @@ export interface Filters {
   
   // 1. Admissions & Selectivity
   maxAcceptance: number;
+  minIntlAcceptance: number; // NEW FILTER
   testOptional: boolean;
   minSatSubmit: number;
   minActSubmit: number;
-  demonstratedInterest: string; // 'Any', 'Important', 'Considered', 'Not Considered'
+  demonstratedInterest: string;
   
   // 2. Financials & Affordability
   maxCost: number;
   minNeedMet: number;
   minMeritPercent: number;
   minAvgMerit: number;
-  minRoi: number; // 20-Year Net ROI
+  minRoi: number;
   
   // 3. Application Details
-  deadline: string;
-  appType: string[]; // ['ED1', 'ED2', 'EA', 'RD']
+  deadline: string; // Values: 'all', 'jan-1-5', 'jan-6-10', 'jan-11-15', 'jan-16-feb-1', 'feb-2-plus'
+  appType: string[];
   scoirFree: boolean;
   noEssays: boolean;
-  maxDetScore: number; // For English Proficiency
+  maxDetScore: number;
   
   // 4. Location & Environment
   minJanTemp: number;
