@@ -1,4 +1,4 @@
-import { ArrowLeft, MapPin, GraduationCap, Users, DollarSign, Thermometer, TrendingUp, Award, BookOpen, Globe, ExternalLink, Video, PenOff, FileText, Wallet } from 'lucide-react';
+import { ArrowLeft, MapPin, GraduationCap, Users, DollarSign, Thermometer, TrendingUp, Award, BookOpen, Globe, ExternalLink, Video, PenOff, FileText, Wallet, Gift } from 'lucide-react';
 import { College } from '@/types/college';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
@@ -12,6 +12,8 @@ interface CollegeDetailProps {
   websiteUrl?: string;
   hasScoir?: boolean;
   hasNoEssay?: boolean;
+  scholarships?: Array<{ name: string; amount: number | null; deadline: string }>;
+  costBreakdown?: { coa: { inState: number; outOfState: number }; tuition: { inState: number; outOfState: number }; roomBoard: number };
 }
 
 const StatItem = ({ label, value, highlight, className }: { label: string; value: string; highlight?: boolean; className?: string }) => (
@@ -41,9 +43,12 @@ export const CollegeDetail = ({
   interviewData,
   websiteUrl,
   hasScoir,
-  hasNoEssay
+  hasNoEssay,
+  scholarships,
+  costBreakdown
 }: CollegeDetailProps) => {
   const c = college;
+  const formatCurrency = (n: number) => `$${n.toLocaleString()}`;
 
   return (
     <div className="min-h-screen bg-app-gradient">
@@ -162,13 +167,45 @@ export const CollegeDetail = ({
 
           {/* Full Cost Breakdown */}
           <Section title="Full Cost Breakdown" icon={Wallet}>
-            <StatItem label="Total Cost of Attendance" value={c.costDisplay} />
-            <StatItem label="Estimated Tuition & Fees" value={c.raw['Tuition and Fees'] || c.costDisplay.split('/')[0] || 'N/A'} />
-            <StatItem label="Room & Board" value={c.raw['Room and Board'] || 'N/A'} />
-            <StatItem label="Books & Supplies" value={c.raw['Books and Supplies'] || '~$1,000'} />
-            <StatItem label="Personal Expenses" value={c.raw['Personal Expenses'] || 'Varies'} />
-            <StatItem label="In-State vs Out-of-State" value={c.costDisplay.includes('/') ? 'Different rates' : 'Same for all'} />
+            {costBreakdown ? (
+              <>
+                <StatItem label="Total COA (In-State)" value={formatCurrency(costBreakdown.coa.inState)} />
+                <StatItem label="Total COA (Out-of-State)" value={formatCurrency(costBreakdown.coa.outOfState)} highlight={costBreakdown.coa.inState !== costBreakdown.coa.outOfState} />
+                <StatItem label="Tuition (In-State)" value={formatCurrency(costBreakdown.tuition.inState)} />
+                <StatItem label="Tuition (Out-of-State)" value={formatCurrency(costBreakdown.tuition.outOfState)} />
+                <StatItem label="Room & Board" value={formatCurrency(costBreakdown.roomBoard)} />
+                <StatItem label="Books & Supplies" value="~$1,200" />
+              </>
+            ) : (
+              <>
+                <StatItem label="Total Cost of Attendance" value={c.costDisplay} />
+                <StatItem label="Room & Board" value={c.raw['Room and Board'] || 'N/A'} />
+              </>
+            )}
           </Section>
+
+          {/* Scholarships */}
+          {scholarships && scholarships.length > 0 && (
+            <div className="bg-gradient-to-br from-accent-orange/10 to-primary/10 rounded-2xl p-6 shadow-card border border-accent-orange/20">
+              <h2 className="flex items-center gap-2 font-heading text-lg font-bold mb-4">
+                <Gift className="w-5 h-5 text-accent-orange" />
+                Available Scholarships
+              </h2>
+              <div className="space-y-3">
+                {scholarships.map((s, i) => (
+                  <div key={i} className="flex items-center justify-between p-3 bg-card/60 rounded-xl">
+                    <div>
+                      <p className="font-semibold text-foreground">{s.name}</p>
+                      <p className="text-sm text-muted-foreground">Deadline: {s.deadline}</p>
+                    </div>
+                    <span className="text-lg font-bold text-accent-green">
+                      {s.amount ? formatCurrency(s.amount) : 'Varies'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Financial Aid */}
           <Section title="Financial Aid" icon={DollarSign}>
