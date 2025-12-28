@@ -9,7 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from '@/components/ui/button';
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"; // Added for deadline
 import { cn } from '@/lib/utils';
 
 interface FilterSidebarProps {
@@ -34,6 +34,9 @@ export const FilterSidebar = ({ filters, setFilters, collapsed, onCloseMobile }:
     <aside 
       className={cn(
         "fixed inset-y-0 left-0 z-50 flex flex-col bg-background/95 backdrop-blur-xl border-r border-border transition-all duration-300 ease-in-out shadow-2xl md:shadow-none md:relative",
+        // Logic: 
+        // If Collapsed: Mobile = Translate Off (-100%), Desktop = Width 0
+        // If Open: Mobile = Translate 0 (Visible), Desktop = Width 80
         collapsed ? "-translate-x-full md:translate-x-0 md:w-0 md:border-r-0 md:overflow-hidden" : "translate-x-0 w-[85vw] md:w-80"
       )}
     >
@@ -49,6 +52,7 @@ export const FilterSidebar = ({ filters, setFilters, collapsed, onCloseMobile }:
         </div>
 
         <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6 pb-20 md:pb-6">
+          
           <div className="bg-secondary/20 p-4 rounded-xl border border-border/50 space-y-4">
             <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-2">
               <CheckCircle2 className="w-4 h-4 text-primary" /> Quick Filters
@@ -98,8 +102,6 @@ export const FilterSidebar = ({ filters, setFilters, collapsed, onCloseMobile }:
                     className="py-2"
                   />
                 </div>
-                
-                {/* NEW: International Acceptance Rate */}
                 <div className="space-y-3 pt-2 border-t border-border/50">
                   <div className="flex justify-between">
                     <Label className="text-xs text-muted-foreground">Min Intl Acceptance</Label>
@@ -112,7 +114,6 @@ export const FilterSidebar = ({ filters, setFilters, collapsed, onCloseMobile }:
                     className="py-2"
                   />
                 </div>
-
                 <div className="space-y-3 pt-2 border-t border-border/50">
                   <div className="flex justify-between">
                     <Label className="text-xs text-muted-foreground">Min % Submitting SAT</Label>
@@ -153,8 +154,6 @@ export const FilterSidebar = ({ filters, setFilters, collapsed, onCloseMobile }:
                     ))}
                   </div>
                 </div>
-
-                {/* NEW: Deadline Ranges */}
                 <div className="space-y-3 pt-2 border-t border-border/50">
                   <Label className="text-xs text-muted-foreground block mb-2">Deadline Date Range</Label>
                   <RadioGroup 
@@ -177,7 +176,6 @@ export const FilterSidebar = ({ filters, setFilters, collapsed, onCloseMobile }:
                     ))}
                   </RadioGroup>
                 </div>
-
                 <div className="space-y-3 pt-2 border-t border-border/50">
                   <div className="flex justify-between">
                     <Label className="text-xs text-muted-foreground">Max DET Score</Label>
@@ -192,7 +190,6 @@ export const FilterSidebar = ({ filters, setFilters, collapsed, onCloseMobile }:
               </AccordionContent>
             </AccordionItem>
 
-            {/* Other Accordions (Financials, Location, Demographics, Academics, Campus) remain identical to previous versions */}
             <AccordionItem value="financials" className="border border-border/60 rounded-xl px-4 shadow-sm bg-card">
               <AccordionTrigger className="hover:no-underline py-4">
                 <div className="flex items-center gap-3 text-sm font-bold">
