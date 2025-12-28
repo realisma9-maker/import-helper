@@ -130,7 +130,7 @@ export const CollegeCard = ({
           </div>
         </div>
 
-        {/* NEW: Specific Deadlines Row (ED2 & RD) */}
+        {/* Specific Deadlines Row (ED2 & RD) */}
         {(college.ed2 !== '-' || college.rd !== '-') && (
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mb-4 px-1">
             <div className="flex items-center gap-1.5 text-xs">
