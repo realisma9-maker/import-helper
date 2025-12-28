@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Sliders, School, Loader2, ListFilter, Home, AlertCircle } from 'lucide-react';
+import { Search, Sliders, School, Loader2, ListFilter, Home, AlertCircle, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
 import { useCollegeData } from '@/hooks/useCollegeData';
 import { FilterSidebar } from '@/components/FilterSidebar';
 import { CollegeCard } from '@/components/CollegeCard';
 import { CollegeDetail } from '@/components/CollegeDetail';
 import { HeroSection } from '@/components/HeroSection';
-import { College, Filters } from '@/types/college';
+import { College } from '@/types/college';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -23,37 +23,32 @@ import { Helmet } from 'react-helmet';
 const ITEMS_PER_PAGE = 24;
 
 const Dashboard = () => {
-  // 1. Load View State (Hero vs App)
+  // 1. FIX: Use sessionStorage for Hero state
+  // This ensures 'Home' shows on new tab, but 'Dashboard' persists on refresh
   const [showHero, setShowHero] = useState(() => {
-    const saved = localStorage.getItem('smartApply_showHero');
+    const saved = sessionStorage.getItem('smartApply_showHero');
     return saved !== null ? JSON.parse(saved) : true;
   });
   
-  // 2. Load Sidebar State
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+  // 2. FIX: Responsive Sidebar State
+  // Default to CLOSED on mobile (< 768px), OPEN on laptop
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => window.innerWidth < 768);
 
-  // 3. Load Selected College (if any)
   const [selectedCollege, setSelectedCollege] = useState<College | null>(null);
   const [activeTab, setActiveTab] = useState('explore');
   const [currentPage, setCurrentPage] = useState(1);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   
-  // Persist Hero State
   useEffect(() => {
-    localStorage.setItem('smartApply_showHero', JSON.stringify(showHero));
+    sessionStorage.setItem('smartApply_showHero', JSON.stringify(showHero));
   }, [showHero]);
 
   const { 
     filteredColleges, 
     loading, 
     error,
-    filters,      // These now come from the hook with their own internal state/persistence if managed there,
-    setFilters,   // but since we define state in the hook, let's ensure the HOOK handles the initial load or we pass it down.
-                  // Actually, to ensure persistence works perfectly across the "Back" button, 
-                  // we should initialize the hook with saved data or let the hook handle it.
-                  // See the updated hook logic below or assumes useCollegeData handles defaults.
-                  // Ideally, we lift the state up here or rely on the hook's internal persistence.
-                  // For this fix, we will assume the hook provides the state setters.
+    filters, 
+    setFilters,
     NO_ESSAY_COLLEGES,
     ENGLISH_PROFICIENCY_DATA,
     REQUIREMENTS_DATA,
@@ -64,7 +59,6 @@ const Dashboard = () => {
     COST_BREAKDOWN_DATA
   } = useCollegeData();
 
-  // Reset page when filters change (but not on initial load if restoring)
   useEffect(() => {
     if (currentPage !== 1) setCurrentPage(1);
     if (scrollContainerRef.current) scrollContainerRef.current.scrollTop = 0;
@@ -114,6 +108,18 @@ const Dashboard = () => {
     <>
       <Helmet><title>Explore Universities | SmartApply</title></Helmet>
       <div className="flex h-screen bg-app-gradient overflow-hidden relative">
+        
+        {/* FIX: Floating Filter Button for Mobile (Instant Visibility) */}
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          className={`fixed top-3 left-3 z-50 w-10 h-10 rounded-lg shadow-lg md:hidden transition-all duration-300 ${!sidebarCollapsed ? 'bg-primary text-primary-foreground border-primary' : 'bg-background/80 backdrop-blur-md border-border'}`}
+        >
+          <Sliders className="w-5 h-5" />
+        </Button>
+
+        {/* Overlay for Mobile */}
         {!sidebarCollapsed && (
           <div className="fixed inset-0 bg-black/50 z-40 md:hidden backdrop-blur-sm" onClick={() => setSidebarCollapsed(true)} />
         )}
@@ -125,13 +131,22 @@ const Dashboard = () => {
           onCloseMobile={() => setSidebarCollapsed(true)}
         />
 
-        <main className="flex-1 flex flex-col overflow-hidden w-full">
+        <main className="flex-1 flex flex-col overflow-hidden w-full transition-all duration-300">
           <header className="glass-dark border-b border-border px-4 py-3 md:px-6 md:py-4 sticky top-0 z-30">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <div className="flex items-center gap-3 w-full md:w-auto md:flex-1 md:max-w-md">
-                <Button variant="outline" size="icon" onClick={() => setSidebarCollapsed(!sidebarCollapsed)} className="md:hidden flex-shrink-0">
-                  <Sliders className="w-5 h-5" />
+              <div className="flex items-center gap-3 w-full md:w-auto md:flex-1 md:max-w-md pl-12 md:pl-0">
+                
+                {/* FIX: Desktop Sidebar Toggle */}
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={() => setSidebarCollapsed(!sidebarCollapsed)} 
+                  className="hidden md:flex flex-shrink-0 text-muted-foreground hover:text-foreground"
+                  title={sidebarCollapsed ? "Expand Filters" : "Collapse Filters"}
+                >
+                  {sidebarCollapsed ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
                 </Button>
+
                 <div className="relative w-full">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <Input
