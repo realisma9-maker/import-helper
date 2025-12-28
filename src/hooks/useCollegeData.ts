@@ -1,15 +1,15 @@
 import { useState, useEffect, useMemo } from 'react';
 import Papa from 'papaparse';
 import { College, Filters } from '@/types/college';
-import { 
-  COLLEGE_CSV_DATA, 
-  APP_DEADLINES_CSV, 
-  COST_DATA_CSV,
-  ENGLISH_PROFICIENCY_DATA,
-  NO_ESSAY_COLLEGES,
-  FULL_NEED_MET_INTL,
-  CURATED_UNIVERSITIES
-} from '@/data/collegeData';
+import { COLLEGE_CSV_DATA } from '@/data/college_data';
+import { APP_DEADLINES_CSV } from '@/data/deadline_data';
+import { COST_DATA_CSV } from '@/data/cost_data';
+import { ENGLISH_PROFICIENCY_DATA } from '@/data/english_proficiency_data';
+import { REQUIREMENTS_DATA } from '@/data/requirements_data';
+import { NO_ESSAY_COLLEGES, FULL_NEED_MET_INTL, SCOIR_FREE_APP } from '@/data/scholarship_data';
+import { CURATED_UNIVERSITIES } from '@/data/curated_data';
+import { INTERVIEW_DATA } from '@/data/interview_data';
+import { WEBSITE_DATA } from '@/data/website_data';
 
 const parseNum = (val: string | undefined, isPercent = false): number => {
   if (!val || val === 'Not Reported' || val === 'N/A' || val.includes('Test Blind')) return -1;
@@ -103,7 +103,6 @@ export const useCollegeData = () => {
     if (!name || name === 'Not Reported') return null;
 
     const appData = deadlinesMap[name] || {};
-    const costData = costMap[name] || {};
 
     // Parse cost
     let costRaw = get('Cost of Attendance');
@@ -298,6 +297,10 @@ export const useCollegeData = () => {
     setFilters,
     NO_ESSAY_COLLEGES,
     FULL_NEED_MET_INTL,
-    ENGLISH_PROFICIENCY_DATA
+    SCOIR_FREE_APP,
+    ENGLISH_PROFICIENCY_DATA,
+    REQUIREMENTS_DATA,
+    INTERVIEW_DATA,
+    WEBSITE_DATA
   };
 };

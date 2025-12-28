@@ -8,7 +8,7 @@ import { HeroSection } from '@/components/HeroSection';
 import { College } from '@/types/college';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { REQUIREMENTS_DATA } from '@/data/collegeData';
+
 import { Helmet } from 'react-helmet';
 
 const Dashboard = () => {
@@ -23,7 +23,8 @@ const Dashboard = () => {
     filters, 
     setFilters,
     NO_ESSAY_COLLEGES,
-    ENGLISH_PROFICIENCY_DATA
+    ENGLISH_PROFICIENCY_DATA,
+    REQUIREMENTS_DATA
   } = useCollegeData();
 
   if (showHero) {
