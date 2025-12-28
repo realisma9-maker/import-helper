@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Search, Sliders, School, Loader2, ListFilter } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Sliders, School, Loader2, ListFilter, Home, LogOut } from 'lucide-react';
 import { useCollegeData } from '@/hooks/useCollegeData';
 import { FilterSidebar } from '@/components/FilterSidebar';
 import { CollegeCard } from '@/components/CollegeCard';
@@ -14,11 +14,21 @@ import { SIAMS_FILTERED_LIST } from '@/data/siams_filtered_list';
 import { Helmet } from 'react-helmet';
 
 const Dashboard = () => {
-  const [showHero, setShowHero] = useState(true);
+  // Initialize state from localStorage to persist view on refresh
+  const [showHero, setShowHero] = useState(() => {
+    const saved = localStorage.getItem('smartApply_showHero');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+  
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [selectedCollege, setSelectedCollege] = useState<College | null>(null);
   const [activeTab, setActiveTab] = useState('explore');
   
+  // Save state changes to localStorage
+  useEffect(() => {
+    localStorage.setItem('smartApply_showHero', JSON.stringify(showHero));
+  }, [showHero]);
+
   const { 
     filteredColleges, 
     loading, 
@@ -112,7 +122,7 @@ const Dashboard = () => {
         <main className="flex-1 flex flex-col overflow-hidden">
           {/* Top Bar */}
           <header className="glass-dark border-b border-border px-6 py-4 flex items-center justify-between sticky top-0 z-10">
-            <div className="relative w-full max-w-md">
+            <div className="relative w-full max-w-md ml-12 md:ml-0">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 type="text"
@@ -122,9 +132,23 @@ const Dashboard = () => {
                 className="pl-10 bg-secondary/50 border-0 focus-visible:ring-primary"
               />
             </div>
-            <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full">
-              <span className="font-bold">{currentColleges.length}</span>
-              <span className="text-sm">Schools Found</span>
+            
+            <div className="flex items-center gap-3">
+              <div className="hidden md:flex items-center gap-2 px-4 py-2 bg-primary/10 text-primary rounded-full">
+                <span className="font-bold">{currentColleges.length}</span>
+                <span className="text-sm">Schools Found</span>
+              </div>
+              
+              <Button 
+                variant="ghost" 
+                size="sm"
+                onClick={() => setShowHero(true)}
+                className="text-muted-foreground hover:text-foreground"
+                title="Back to Home"
+              >
+                <Home className="w-5 h-5 md:mr-2" />
+                <span className="hidden md:inline">Back to Home</span>
+              </Button>
             </div>
           </header>
 
