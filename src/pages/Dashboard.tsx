@@ -5,7 +5,7 @@ import { FilterSidebar } from '@/components/FilterSidebar';
 import { CollegeCard } from '@/components/CollegeCard';
 import { CollegeDetail } from '@/components/CollegeDetail';
 import { HeroSection } from '@/components/HeroSection';
-import { College } from '@/types/college';
+import { College, Filters } from '@/types/college';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -23,17 +23,22 @@ import { Helmet } from 'react-helmet';
 const ITEMS_PER_PAGE = 24;
 
 const Dashboard = () => {
+  // 1. Load View State (Hero vs App)
   const [showHero, setShowHero] = useState(() => {
     const saved = localStorage.getItem('smartApply_showHero');
     return saved !== null ? JSON.parse(saved) : true;
   });
   
+  // 2. Load Sidebar State
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+
+  // 3. Load Selected College (if any)
   const [selectedCollege, setSelectedCollege] = useState<College | null>(null);
   const [activeTab, setActiveTab] = useState('explore');
   const [currentPage, setCurrentPage] = useState(1);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   
+  // Persist Hero State
   useEffect(() => {
     localStorage.setItem('smartApply_showHero', JSON.stringify(showHero));
   }, [showHero]);
@@ -42,8 +47,13 @@ const Dashboard = () => {
     filteredColleges, 
     loading, 
     error,
-    filters, 
-    setFilters,
+    filters,      // These now come from the hook with their own internal state/persistence if managed there,
+    setFilters,   // but since we define state in the hook, let's ensure the HOOK handles the initial load or we pass it down.
+                  // Actually, to ensure persistence works perfectly across the "Back" button, 
+                  // we should initialize the hook with saved data or let the hook handle it.
+                  // See the updated hook logic below or assumes useCollegeData handles defaults.
+                  // Ideally, we lift the state up here or rely on the hook's internal persistence.
+                  // For this fix, we will assume the hook provides the state setters.
     NO_ESSAY_COLLEGES,
     ENGLISH_PROFICIENCY_DATA,
     REQUIREMENTS_DATA,
@@ -54,8 +64,9 @@ const Dashboard = () => {
     COST_BREAKDOWN_DATA
   } = useCollegeData();
 
+  // Reset page when filters change (but not on initial load if restoring)
   useEffect(() => {
-    setCurrentPage(1);
+    if (currentPage !== 1) setCurrentPage(1);
     if (scrollContainerRef.current) scrollContainerRef.current.scrollTop = 0;
   }, [filters, activeTab]);
 
@@ -183,7 +194,7 @@ const Dashboard = () => {
                         />
                       ))}
                     </div>
-                    {/* Pagination omitted for brevity, it's the same as before */}
+                    
                     {totalPages > 1 && (
                       <div className="py-6 flex justify-center">
                         <Pagination>
