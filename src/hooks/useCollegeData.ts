@@ -32,16 +32,48 @@ const parseRange = (val: string | undefined): { min: number; max: number } => {
 export const useCollegeData = () => {
   const [allColleges, setAllColleges] = useState<College[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Comprehensive Initial Filters
   const [filters, setFilters] = useState<Filters>({
     search: '',
-    deadline: 'all',
+    
+    // Admissions
     maxAcceptance: 100,
     testOptional: false,
+    minSatSubmit: 0,
+    minActSubmit: 0,
+    demonstratedInterest: 'Any',
+    
+    // Financials
     maxCost: 100000,
     minNeedMet: 0,
+    minMeritPercent: 0,
+    minAvgMerit: 0,
+    minRoi: 0,
+    
+    // Application
+    deadline: 'all',
+    appType: [],
+    scoirFree: false,
+    noEssays: false,
+    maxDetScore: 160,
+    
+    // Location
+    minJanTemp: 0,
+    minSunnyDays: 0,
+    maxPrecipDays: 365,
+    
+    // Demographics
+    minEnrollment: 0,
     minIntl: 0,
-    housingRequired: false,
-    minJanTemp: 0
+    
+    // Academics
+    minGradRate: 0,
+    minRetention: 0,
+    
+    // Campus
+    minOnCampus: 0,
+    housingRequired: false
   });
 
   useEffect(() => {
@@ -225,7 +257,7 @@ export const useCollegeData = () => {
 
   const filteredColleges = useMemo(() => {
     return allColleges.filter(c => {
-      // Search filter
+      // 0. Search
       if (filters.search) {
         const q = filters.search.toLowerCase();
         if (!c.name.toLowerCase().includes(q) &&
@@ -235,7 +267,55 @@ export const useCollegeData = () => {
         }
       }
 
-      // Deadline filter
+      // 1. Admissions & Selectivity
+      if (filters.maxAcceptance < 100 && c.acceptanceRate !== -1 && c.acceptanceRate > filters.maxAcceptance) return false;
+      if (filters.testOptional) {
+        const subSAT = parseFloat(c.percentSubmittingSAT);
+        const isBlind = c.percentSubmittingSAT.includes('Blind');
+        if (!isBlind && (isNaN(subSAT) || subSAT > 30)) return false;
+      }
+      if (filters.minSatSubmit > 0) {
+        const val = parseFloat(c.percentSubmittingSAT);
+        if (isNaN(val) || val < filters.minSatSubmit) return false;
+      }
+      if (filters.minActSubmit > 0) {
+        const val = parseFloat(c.percentSubmittingACT);
+        if (isNaN(val) || val < filters.minActSubmit) return false;
+      }
+      if (filters.demonstratedInterest !== 'Any') {
+        if (!c.demonstratedInterest.includes(filters.demonstratedInterest)) return false;
+      }
+
+      // 2. Financials & Affordability
+      if (filters.maxCost < 100000 && c.costOfAttendance !== -1 && c.costOfAttendance > filters.maxCost) return false;
+      if (filters.minNeedMet > 0 && c.needMet !== -1 && c.needMet < filters.minNeedMet) return false;
+      if (filters.minMeritPercent > 0 && c.meritAidPercent !== -1 && c.meritAidPercent < filters.minMeritPercent) return false;
+      if (filters.minAvgMerit > 0) {
+        const val = parseNum(c.avgMeritAward);
+        if (val !== -1 && val < filters.minAvgMerit) return false;
+      }
+      if (filters.minRoi > 0) {
+        const val = parseNum(c.roi20yr);
+        if (val !== -1 && val < filters.minRoi) return false;
+      }
+
+      // 3. Application Details
+      if (filters.scoirFree && !SCOIR_FREE_APP.has(c.name)) return false;
+      if (filters.noEssays && !NO_ESSAY_COLLEGES.has(c.name)) return false;
+      if (filters.maxDetScore < 160) {
+        const detStr = ENGLISH_PROFICIENCY_DATA[c.name]?.DET;
+        const det = parseNum(detStr);
+        if (det !== -1 && det > filters.maxDetScore) return false;
+      }
+      if (filters.appType.length > 0) {
+        let hasType = false;
+        if (filters.appType.includes('ED1') && c.ed1 !== '-') hasType = true;
+        if (filters.appType.includes('ED2') && c.ed2 !== '-') hasType = true;
+        if (filters.appType.includes('EA') && (c.ea1 !== '-' || c.ea2 !== '-')) hasType = true;
+        if (filters.appType.includes('RD') && c.rd !== '-') hasType = true;
+        if (!hasType) return false;
+      }
+      // Existing Deadline Month filter
       if (filters.deadline !== 'all' && c.deadlineDate) {
         const m = c.deadlineDate.getMonth();
         const d = c.deadlineDate.getDate();
@@ -245,37 +325,37 @@ export const useCollegeData = () => {
         if (filters.deadline === 'feb-plus' && m < 1) return false;
       }
 
-      // Acceptance rate filter
-      if (filters.maxAcceptance < 100 && c.acceptanceRate !== -1 && c.acceptanceRate > filters.maxAcceptance) {
-        return false;
+      // 4. Location
+      if (filters.minJanTemp > 0 && c.weatherJan !== -1 && c.weatherJan < filters.minJanTemp) return false;
+      if (filters.minSunnyDays > 0) {
+        const val = parseNum(c.sunnyDays);
+        if (val !== -1 && val < filters.minSunnyDays) return false;
+      }
+      if (filters.maxPrecipDays < 365) {
+        const val = parseNum(c.precipDays);
+        if (val !== -1 && val > filters.maxPrecipDays) return false;
       }
 
-      // Test optional filter
-      if (filters.testOptional) {
-        const subSAT = parseFloat(c.percentSubmittingSAT);
-        const isBlind = c.percentSubmittingSAT.includes('Blind');
-        if (!isBlind && (isNaN(subSAT) || subSAT > 30)) return false;
+      // 5. Student Body
+      if (filters.minEnrollment > 0 && c.enrollment !== -1 && c.enrollment < filters.minEnrollment) return false;
+      if (filters.minIntl > 0 && c.percentIntl !== -1 && c.percentIntl < filters.minIntl) return false;
+
+      // 6. Academics
+      if (filters.minGradRate > 0) {
+        const val = parseNum(c.gradRate4, true);
+        if (val !== -1 && val < filters.minGradRate) return false;
+      }
+      if (filters.minRetention > 0) {
+        const val = parseNum(c.retentionRate, true);
+        if (val !== -1 && val < filters.minRetention) return false;
       }
 
-      // Cost filter
-      if (filters.maxCost < 100000 && c.costOfAttendance !== -1 && c.costOfAttendance > filters.maxCost) {
-        return false;
+      // 7. Campus
+      if (filters.minOnCampus > 0) {
+        const val = parseNum(c.livingOnCampus, true);
+        if (val !== -1 && val < filters.minOnCampus) return false;
       }
-
-      // Need met filter
-      if (filters.minNeedMet > 0 && c.needMet !== -1 && c.needMet < filters.minNeedMet) {
-        return false;
-      }
-
-      // International % filter
-      if (filters.minIntl > 0 && c.percentIntl !== -1 && c.percentIntl < filters.minIntl) {
-        return false;
-      }
-
-      // Housing filter
-      if (filters.housingRequired && (!c.housingReq || c.housingReq === 'None' || c.housingReq === 'Not Reported')) {
-        return false;
-      }
+      if (filters.housingRequired && (!c.housingReq || c.housingReq === 'None' || c.housingReq === 'Not Reported')) return false;
 
       return true;
     }).sort((a, b) => {
