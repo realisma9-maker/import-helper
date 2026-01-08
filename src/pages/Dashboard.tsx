@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
-import { Search, Sliders, School, Loader2, ListFilter, Home, AlertCircle, PanelLeftClose, PanelLeftOpen } from 'lucide-react';
+import { Search, Sliders, School, Loader2, ListFilter, Home, AlertCircle, PanelLeftClose, PanelLeftOpen, CalendarDays } from 'lucide-react';
 import { useCollegeData } from '@/hooks/useCollegeData';
 import { FilterSidebar } from '@/components/FilterSidebar';
 import { CollegeCard } from '@/components/CollegeCard';
 import { CollegeDetail } from '@/components/CollegeDetail';
 import { HeroSection } from '@/components/HeroSection';
+import { DeadlineCalendar } from '@/components/DeadlineCalendar';
 import { College } from '@/types/college';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -23,23 +24,19 @@ import { Helmet } from 'react-helmet';
 const ITEMS_PER_PAGE = 24;
 
 const Dashboard = () => {
-  // 1. FIX: Use sessionStorage with a NEW key to force reset
-  const [showHero, setShowHero] = useState(() => {
-    const saved = sessionStorage.getItem('smartApply_viewState_v2');
-    return saved !== null ? JSON.parse(saved) : true;
-  });
+  // Always show hero on first visit/refresh
+  const [showHero, setShowHero] = useState(true);
   
-  // 2. FIX: Responsive Sidebar State (Closed on Mobile, Open on Desktop)
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => window.innerWidth < 768);
+  // Sidebar collapsed by default - user can expand if needed
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
+  
+  // Calendar view state
+  const [showCalendar, setShowCalendar] = useState(false);
 
   const [selectedCollege, setSelectedCollege] = useState<College | null>(null);
   const [activeTab, setActiveTab] = useState('explore');
   const [currentPage, setCurrentPage] = useState(1);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  
-  useEffect(() => {
-    sessionStorage.setItem('smartApply_viewState_v2', JSON.stringify(showHero));
-  }, [showHero]);
 
   const { 
     filteredColleges, 
@@ -165,6 +162,15 @@ const Dashboard = () => {
                   <span>{totalItems}</span>
                   <span className="font-normal">Results</span>
                 </div>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => setShowCalendar(true)} 
+                  className="h-9 gap-2"
+                >
+                  <CalendarDays className="w-4 h-4" />
+                  <span className="text-sm hidden sm:inline">Calendar</span>
+                </Button>
                 <Button variant="ghost" size="sm" onClick={() => setShowHero(true)} className="text-muted-foreground hover:text-foreground h-9">
                   <Home className="w-4 h-4 mr-2" />
                   <span className="text-sm">Home</span>
@@ -228,6 +234,18 @@ const Dashboard = () => {
             )}
           </div>
         </main>
+
+        {/* Calendar Modal */}
+        {showCalendar && (
+          <DeadlineCalendar 
+            colleges={currentList} 
+            onCollegeClick={(college) => {
+              setShowCalendar(false);
+              setSelectedCollege(college);
+            }}
+            onClose={() => setShowCalendar(false)} 
+          />
+        )}
       </div>
     </>
   );
